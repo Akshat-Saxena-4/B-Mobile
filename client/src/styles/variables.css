@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Fraunces', serif;
+
+  --bg: #f5f2ea;
+  --bg-alt: #fdfbf7;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: #ffffff;
+  --surface-dark: #111827;
+  --text: #161923;
+  --text-soft: #5b6475;
+  --border: rgba(15, 23, 42, 0.08);
+  --line: rgba(17, 24, 39, 0.1);
+
+  --primary: #0d6efd;
+  --primary-dark: #0a58ca;
+  --secondary: #ff9f0a;
+  --success: #0f9d76;
+  --danger: #d64545;
+  --shadow: 0 20px 70px rgba(13, 35, 67, 0.1);
+  --radius: 24px;
+  --radius-sm: 16px;
+  --radius-xs: 12px;
+  --container: 1180px;
+}
+
