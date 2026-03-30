@@ -11,4 +11,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
+client-dev.log
+server-dev.log
+client-live.out.log
+client-live.err.log
+server-live.out.log
+server-live.err.log

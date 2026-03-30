@@ -12,6 +12,12 @@ const Navbar = () => {
   const { summary } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const dashboardLink =
+    user?.role === ROLES.ADMIN
+      ? { path: '/admin', label: 'Admin Panel' }
+      : user?.role === ROLES.SHOPKEEPER
+        ? { path: '/seller', label: 'Seller Studio' }
+        : null;
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -47,8 +53,7 @@ const Navbar = () => {
         <nav className="desktop-nav desktop-only">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/products">Explore</NavLink>
-          {user?.role === ROLES.SHOPKEEPER ? <NavLink to="/seller/dashboard">Seller</NavLink> : null}
-          {user?.role === ROLES.ADMIN ? <NavLink to="/admin/dashboard">Admin</NavLink> : null}
+          {dashboardLink ? <NavLink to={dashboardLink.path}>{dashboardLink.label}</NavLink> : null}
         </nav>
 
         <div className="nav-actions">
@@ -124,14 +129,9 @@ const Navbar = () => {
                 </NavLink>
               </>
             ) : null}
-            {user?.role === ROLES.SHOPKEEPER ? (
-              <NavLink onClick={() => setIsMenuOpen(false)} to="/seller/dashboard">
-                Seller Dashboard
-              </NavLink>
-            ) : null}
-            {user?.role === ROLES.ADMIN ? (
-              <NavLink onClick={() => setIsMenuOpen(false)} to="/admin/dashboard">
-                Admin Dashboard
+            {dashboardLink ? (
+              <NavLink onClick={() => setIsMenuOpen(false)} to={dashboardLink.path}>
+                {dashboardLink.label}
               </NavLink>
             ) : null}
             {isAuthenticated ? (
@@ -161,4 +161,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

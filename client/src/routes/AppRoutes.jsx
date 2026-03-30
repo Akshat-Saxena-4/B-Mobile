@@ -98,9 +98,17 @@ const AppRoutes = () => {
           />
 
           <Route
+            path="/seller"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER]}>
+                <Navigate to="/seller/dashboard" replace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/seller/dashboard"
             element={
-              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER, ROLES.ADMIN]}>
+              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER]}>
                 <ShopkeeperDashboard />
               </ProtectedRoute>
             }
@@ -108,7 +116,7 @@ const AppRoutes = () => {
           <Route
             path="/seller/products/new"
             element={
-              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER, ROLES.ADMIN]}>
+              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER]}>
                 <AddProduct />
               </ProtectedRoute>
             }
@@ -116,7 +124,7 @@ const AppRoutes = () => {
           <Route
             path="/seller/products"
             element={
-              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER, ROLES.ADMIN]}>
+              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER]}>
                 <ManageProducts />
               </ProtectedRoute>
             }
@@ -124,12 +132,20 @@ const AppRoutes = () => {
           <Route
             path="/seller/orders"
             element={
-              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER, ROLES.ADMIN]}>
+              <ProtectedRoute allowedRoles={[ROLES.SHOPKEEPER]}>
                 <ShopkeeperOrders />
               </ProtectedRoute>
             }
           />
 
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <Navigate to="/admin/dashboard" replace />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/dashboard"
             element={
@@ -180,4 +196,3 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
