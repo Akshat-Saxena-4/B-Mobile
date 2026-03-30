@@ -82,6 +82,7 @@ const Navbar = () => {
           ) : (
             <div className="desktop-only auth-actions">
               <NavLink to="/login">Login</NavLink>
+              <NavLink to="/admin/login">Admin Panel</NavLink>
               <Button size="sm" onClick={() => navigate('/register')}>
                 Join Now
               </Button>
@@ -147,6 +148,9 @@ const Navbar = () => {
               <>
                 <NavLink onClick={() => setIsMenuOpen(false)} to="/login">
                   Login
+                </NavLink>
+                <NavLink onClick={() => setIsMenuOpen(false)} to="/admin/login">
+                  Admin Panel
                 </NavLink>
                 <NavLink onClick={() => setIsMenuOpen(false)} to="/register">
                   Register

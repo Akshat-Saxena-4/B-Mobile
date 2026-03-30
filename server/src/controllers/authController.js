@@ -81,11 +81,16 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, expectedRole } = req.body;
 
   if (!email || !password) {
     res.status(400);
     throw new Error('Email and password are required');
+  }
+
+  if (expectedRole && !Object.values(ROLES).includes(expectedRole)) {
+    res.status(400);
+    throw new Error('Invalid login portal selected');
   }
 
   const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
@@ -93,6 +98,15 @@ export const login = asyncHandler(async (req, res) => {
   if (!user || !(await user.comparePassword(password))) {
     res.status(401);
     throw new Error('Invalid email or password');
+  }
+
+  if (expectedRole && user.role !== expectedRole) {
+    res.status(403);
+    throw new Error(
+      expectedRole === ROLES.ADMIN
+        ? 'This account does not have access to the admin panel'
+        : 'This account does not have access to this portal'
+    );
   }
 
   const safeUser = await User.findById(user._id).select('-password');
@@ -144,4 +158,3 @@ export const updateProfile = asyncHandler(async (req, res) => {
     data: user,
   });
 });
-

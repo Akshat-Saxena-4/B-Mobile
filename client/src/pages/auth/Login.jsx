@@ -7,7 +7,7 @@ import { clearAuthError, loginUser } from '../../store/slices/authSlice.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { ROLES } from '../../utils/constants.js';
 
-const Login = () => {
+const Login = ({ adminOnly = false }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,24 +34,41 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await dispatch(loginUser(form));
+    await dispatch(
+      loginUser({
+        ...form,
+        ...(adminOnly ? { expectedRole: ROLES.ADMIN } : {}),
+      })
+    );
   };
+
+  const eyebrow = adminOnly ? 'Restricted Access' : 'Access Everything';
+  const title = adminOnly
+    ? 'Sign in to the admin control center.'
+    : 'Sign in to manage shopping, selling, and operations from one place.';
+  const description = adminOnly
+    ? 'This login is reserved for marketplace administrators managing approvals, performance, and catalog quality.'
+    : 'Customers can track orders and save favorites. Shopkeepers manage inventory and sales. Admins oversee approvals, performance, and catalog quality.';
+  const formEyebrow = adminOnly ? 'Admin Panel' : 'Welcome Back';
+  const formTitle = adminOnly ? 'Admin Login' : 'Login';
+  const submitLabel = isLoading
+    ? 'Signing in...'
+    : adminOnly
+      ? 'Enter Admin Panel'
+      : 'Login';
 
   return (
     <section className="auth-shell container">
       <div className="auth-panel auth-aside">
-        <p className="eyebrow">Access Everything</p>
-        <h1>Sign in to manage shopping, selling, and operations from one place.</h1>
-        <p className="section-copy">
-          Customers can track orders and save favorites. Shopkeepers manage inventory and sales.
-          Admins oversee approvals, performance, and catalog quality.
-        </p>
+        <p className="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p className="section-copy">{description}</p>
       </div>
 
       <form className="auth-panel auth-form" onSubmit={handleSubmit}>
         <div>
-          <p className="eyebrow">Welcome Back</p>
-          <h2>Login</h2>
+          <p className="eyebrow">{formEyebrow}</p>
+          <h2>{formTitle}</h2>
         </div>
         <Input
           label="Email"
@@ -71,15 +88,32 @@ const Login = () => {
         />
         {error ? <div className="alert alert-error">{error}</div> : null}
         <Button type="submit" fullWidth disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Login'}
+          {submitLabel}
         </Button>
         <p className="muted-text">
-          Need an account? <Link to="/register">Create one</Link>
+          {adminOnly ? (
+            <>
+              Not an admin? <Link to="/login">Use the standard login</Link>
+            </>
+          ) : (
+            <>
+              Need an account? <Link to="/register">Create one</Link>
+            </>
+          )}
         </p>
+        {!adminOnly ? (
+          <p className="muted-text">
+            Admin team? <Link to="/admin/login">Use admin panel login</Link>
+          </p>
+        ) : null}
+        {adminOnly ? (
+          <p className="muted-text">
+            New customers and sellers can still <Link to="/register">register here</Link>.
+          </p>
+        ) : null}
       </form>
     </section>
   );
 };
 
 export default Login;
-
