@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   clearCart,
+  deleteUser,
   getCart,
   getUsers,
   getWishlist,
@@ -28,6 +29,6 @@ router.delete('/cart', authorize(ROLES.CUSTOMER), clearCart);
 router.get('/', authorize(ROLES.ADMIN), getUsers);
 router.patch('/:userId/status', authorize(ROLES.ADMIN), toggleUserStatus);
 router.patch('/:userId/seller-approval', authorize(ROLES.ADMIN), updateSellerApproval);
+router.delete('/:userId', authorize(ROLES.ADMIN), deleteUser);
 
 export default router;
-

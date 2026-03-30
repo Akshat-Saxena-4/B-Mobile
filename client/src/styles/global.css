@@ -389,6 +389,18 @@ button {
   border: 1px solid var(--line);
 }
 
+.btn-danger {
+  background: rgba(214, 69, 69, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(214, 69, 69, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-sm {
   padding: 0.7rem 1rem;
 }
@@ -833,6 +845,56 @@ button {
 .order-head h3,
 .product-admin-row h3 {
   margin: 0;
+}
+
+.order-summary-meta,
+.order-list-meta,
+.order-status-stack {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.order-summary-meta,
+.order-list-meta {
+  justify-items: end;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-pill-pending {
+  background: rgba(255, 159, 10, 0.14);
+  color: #9a5b00;
+}
+
+.status-pill-ongoing {
+  background: rgba(13, 110, 253, 0.12);
+  color: var(--primary);
+}
+
+.status-pill-completed {
+  background: rgba(15, 157, 118, 0.12);
+  color: var(--success);
+}
+
+.status-pill-cancelled {
+  background: rgba(214, 69, 69, 0.12);
+  color: var(--danger);
+}
+
+.status-detail {
+  font-size: 0.82rem;
+  color: var(--text-soft);
 }
 
 .site-footer {

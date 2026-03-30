@@ -39,10 +39,23 @@ const mapMonthlySeries = (orders, valueSelector) => {
   }));
 };
 
+const getCurrentMonthRange = () => {
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1);
+
+  return { start, end };
+};
+
 export const getShopkeeperDashboard = asyncHandler(async (req, res) => {
   const userId = req.user._id.toString();
   const products = await Product.find({ seller: userId }).sort({ createdAt: -1 });
-  const orders = await Order.find({ 'items.seller': userId }).sort({ createdAt: -1 });
+  const orders = await Order.find({ 'items.seller': userId })
+    .populate('customer', 'firstName lastName email')
+    .sort({ createdAt: -1 });
 
   const revenue = orders.reduce((sum, order) => {
     const sellerRevenue = order.items
@@ -108,8 +121,14 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     Order.find().populate('customer', 'firstName lastName email').sort({ createdAt: -1 }),
   ]);
 
-  const revenue = orders
-    .filter((order) => order.fulfillment.status !== ORDER_STATUS.CANCELLED)
+  const activeOrders = orders.filter((order) => order.fulfillment.status !== ORDER_STATUS.CANCELLED);
+  const revenue = activeOrders.reduce((sum, order) => sum + order.pricing.grandTotal, 0);
+  const { start, end } = getCurrentMonthRange();
+  const currentMonthSales = activeOrders
+    .filter((order) => {
+      const createdAt = new Date(order.createdAt);
+      return createdAt >= start && createdAt < end;
+    })
     .reduce((sum, order) => sum + order.pricing.grandTotal, 0);
 
   res.json({
@@ -124,9 +143,11 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
         products: products.length,
         orders: orders.length,
         revenue: Number(revenue.toFixed(2)),
+        currentMonthSales: Number(currentMonthSales.toFixed(2)),
       },
+      currentMonthLabel: start.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
       monthlyRevenue: mapMonthlySeries(
-        orders.filter((order) => order.fulfillment.status !== ORDER_STATUS.CANCELLED),
+        activeOrders,
         (order) => order.pricing.grandTotal
       ),
       recentOrders: orders.slice(0, 6),
@@ -141,4 +162,3 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
     },
   });
 });
-

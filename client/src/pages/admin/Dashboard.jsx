@@ -13,6 +13,7 @@ import {
 import DashboardLayout from '../../components/layout/DashboardLayout.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import StatCard from '../../components/dashboard/StatCard.jsx';
+import OrderStatusBadge from '../../components/order/OrderStatusBadge.jsx';
 import dashboardService from '../../services/dashboardService.js';
 import formatCurrency from '../../utils/formatCurrency.js';
 
@@ -54,6 +55,11 @@ const Dashboard = () => {
         <StatCard label="Shopkeepers" value={dashboard?.stats?.shopkeepers || 0} />
         <StatCard label="Orders" value={dashboard?.stats?.orders || 0} />
         <StatCard label="Revenue" value={formatCurrency(dashboard?.stats?.revenue || 0)} />
+        <StatCard
+          label="Monthly Sales"
+          value={formatCurrency(dashboard?.stats?.currentMonthSales || 0)}
+          helper={dashboard?.currentMonthLabel || 'Current month'}
+        />
       </div>
 
       <div className="dashboard-two-up">
@@ -114,9 +120,16 @@ const Dashboard = () => {
                 <div key={order._id} className="list-row">
                   <div>
                     <strong>{order.orderNumber}</strong>
-                    <p className="muted-text">{order.customer?.firstName} {order.customer?.lastName}</p>
+                    <p className="muted-text">
+                      {order.customer
+                        ? `${order.customer.firstName} ${order.customer.lastName}`
+                        : 'Deleted user'}
+                    </p>
                   </div>
-                  <span>{formatCurrency(order.pricing?.grandTotal)}</span>
+                  <div className="order-list-meta">
+                    <OrderStatusBadge status={order.fulfillment?.status} showDetail={false} />
+                    <span>{formatCurrency(order.pricing?.grandTotal)}</span>
+                  </div>
                 </div>
               ))
             ) : (
@@ -130,4 +143,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

@@ -13,6 +13,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout.jsx';
 import Button from '../../components/common/Button.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import StatCard from '../../components/dashboard/StatCard.jsx';
+import OrderStatusBadge from '../../components/order/OrderStatusBadge.jsx';
 import dashboardService from '../../services/dashboardService.js';
 import formatCurrency from '../../utils/formatCurrency.js';
 
@@ -124,9 +125,16 @@ const Dashboard = () => {
                 <div key={order._id} className="list-row">
                   <div>
                     <strong>{order.orderNumber}</strong>
-                    <p className="muted-text">{order.fulfillment?.status}</p>
+                    <p className="muted-text">
+                      {order.customer
+                        ? `${order.customer.firstName} ${order.customer.lastName}`
+                        : 'Deleted user'}
+                    </p>
                   </div>
-                  <span>{formatCurrency(order.pricing?.grandTotal)}</span>
+                  <div className="order-list-meta">
+                    <OrderStatusBadge status={order.fulfillment?.status} showDetail={false} />
+                    <span>{formatCurrency(order.pricing?.grandTotal)}</span>
+                  </div>
                 </div>
               ))
             ) : (
@@ -140,4 +148,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

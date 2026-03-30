@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout.jsx';
 import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
+import OrderStatusBadge from '../../components/order/OrderStatusBadge.jsx';
 import orderService from '../../services/orderService.js';
 import formatCurrency from '../../utils/formatCurrency.js';
 import { ORDER_STATUS_OPTIONS } from '../../utils/constants.js';
@@ -30,9 +31,16 @@ const Orders = () => {
             <div className="order-head">
               <div>
                 <p className="eyebrow">{order.orderNumber}</p>
-                <h3>{order.customer?.firstName} {order.customer?.lastName}</h3>
+                <h3>
+                  {order.customer
+                    ? `${order.customer.firstName} ${order.customer.lastName}`
+                    : 'Deleted user'}
+                </h3>
               </div>
-              <strong>{formatCurrency(order.pricing?.grandTotal)}</strong>
+              <div className="order-summary-meta">
+                <OrderStatusBadge status={order.fulfillment?.status} />
+                <strong>{formatCurrency(order.pricing?.grandTotal)}</strong>
+              </div>
             </div>
 
             <form
@@ -69,4 +77,3 @@ const Orders = () => {
 };
 
 export default Orders;
-

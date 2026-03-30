@@ -1,12 +1,44 @@
 import User from '../models/User.js';
 import Product from '../models/Product.js';
+import Review from '../models/Review.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import { SELLER_STATUS } from '../constants/roles.js';
+import { PRODUCT_STATUS, ROLES, SELLER_STATUS } from '../constants/roles.js';
 
 const populateCart = async (userId) =>
   User.findById(userId)
     .select('cart')
     .populate('cart.product', 'title slug price thumbnail brand inventory ratings');
+
+const archiveSellerProducts = async (sellerId) => {
+  const sellerProducts = await Product.find({ seller: sellerId }).select('_id');
+  const productIds = sellerProducts.map((product) => product._id);
+
+  if (!productIds.length) {
+    return 0;
+  }
+
+  await Product.updateMany(
+    { _id: { $in: productIds } },
+    {
+      $set: {
+        isActive: false,
+        status: PRODUCT_STATUS.ARCHIVED,
+      },
+    }
+  );
+
+  await User.updateMany(
+    {},
+    {
+      $pull: {
+        wishlist: { $in: productIds },
+        cart: { product: { $in: productIds } },
+      },
+    }
+  );
+
+  return productIds.length;
+};
 
 export const getUsers = asyncHandler(async (req, res) => {
   const query = {};
@@ -73,6 +105,37 @@ export const updateSellerApproval = asyncHandler(async (req, res) => {
     success: true,
     message: `Seller ${status.toLowerCase()} successfully`,
     data: user,
+  });
+});
+
+export const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.userId).select('-password');
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (user.role === ROLES.ADMIN) {
+    res.status(400);
+    throw new Error('Admin accounts cannot be deleted');
+  }
+
+  let archivedProducts = 0;
+  if (user.role === ROLES.SHOPKEEPER) {
+    archivedProducts = await archiveSellerProducts(user._id);
+  }
+
+  await Review.deleteMany({ user: user._id });
+  await user.deleteOne();
+
+  res.json({
+    success: true,
+    message: `${user.role === ROLES.SHOPKEEPER ? 'Shopkeeper' : 'User'} deleted successfully`,
+    data: {
+      _id: user._id,
+      archivedProducts,
+    },
   });
 });
 
@@ -198,4 +261,3 @@ export const clearCart = asyncHandler(async (req, res) => {
     data: [],
   });
 });
-

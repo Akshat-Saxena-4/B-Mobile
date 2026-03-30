@@ -37,7 +37,10 @@ const userService = {
     const response = await api.patch(`/users/${userId}/seller-approval`, payload);
     return response.data.data;
   },
+  async deleteUser(userId) {
+    const response = await api.delete(`/users/${userId}`);
+    return response.data;
+  },
 };
 
 export default userService;
-
