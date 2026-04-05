@@ -15,21 +15,23 @@ const Wishlist = () => {
 
   if (!wishlist.length) {
     return (
-      <section className="container empty-page">
-        <div className="empty-state">Your wishlist is empty. Save products you want to revisit.</div>
+      <section className="container empty-page wishlist-page wishlist-page--empty">
+        <div className="empty-state empty-state--card">
+          Your wishlist is empty. Tap the heart on any product — pricing stays visible on the card.
+        </div>
         <Link to="/products">
-          <Button>Browse Catalog</Button>
+          <Button>Explore store</Button>
         </Link>
       </section>
     );
   }
 
   return (
-    <section className="container page-stack">
-      <div className="section-header">
+    <section className="container page-stack wishlist-page">
+      <div className="section-header section-header--tight">
         <div>
           <p className="eyebrow">Wishlist</p>
-          <h1>Keep your favorites close.</h1>
+          <h1>Saved devices with live prices on every image.</h1>
         </div>
       </div>
 

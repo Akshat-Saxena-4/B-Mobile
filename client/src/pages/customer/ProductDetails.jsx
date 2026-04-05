@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
+import SafeImg from '../../components/common/SafeImg.jsx';
 import Input from '../../components/common/Input.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import { addToCart, toggleWishlist } from '../../store/slices/cartSlice.js';
@@ -35,9 +36,9 @@ const ProductDetails = () => {
   }, [dispatch, identifier]);
 
   useEffect(() => {
-    if (currentProduct?.thumbnail) {
-      setSelectedImage(currentProduct.thumbnail);
-    }
+    if (!currentProduct) return;
+    const first = currentProduct.thumbnail || currentProduct.images?.[0] || '';
+    setSelectedImage(first);
   }, [currentProduct]);
 
   const wishlistIds = new Set(wishlist.map((item) => item._id || item.product?._id));
@@ -56,14 +57,27 @@ const ProductDetails = () => {
   };
 
   return (
-    <section className="container page-stack">
+    <section className="container page-stack product-detail-page">
       <div className="product-detail-grid">
-        <div className="gallery-panel">
-          <img
-            src={selectedImage || currentProduct.thumbnail || currentProduct.images?.[0]}
-            alt={currentProduct.title}
-            className="detail-hero-image"
-          />
+        <div className="gallery-panel gallery-panel--enhanced">
+          <div className="detail-gallery-frame">
+            <SafeImg
+              src={selectedImage || currentProduct.thumbnail || currentProduct.images?.[0]}
+              alt={currentProduct.title}
+              className="detail-hero-image"
+              decoding="async"
+            />
+            <div className="detail-gallery-price-float" aria-hidden="true">
+              <span className="detail-gallery-price-float__deal">
+                {formatCurrency(currentProduct.price)}
+              </span>
+              {currentProduct.compareAtPrice ? (
+                <span className="detail-gallery-price-float__mrp">
+                  M.R.P. {formatCurrency(currentProduct.compareAtPrice)}
+                </span>
+              ) : null}
+            </div>
+          </div>
           <div className="thumbnail-row">
             {currentProduct.images?.map((image) => (
               <button
@@ -72,7 +86,7 @@ const ProductDetails = () => {
                 className={`thumbnail-button ${selectedImage === image ? 'active' : ''}`.trim()}
                 onClick={() => setSelectedImage(image)}
               >
-                <img src={image} alt={currentProduct.title} />
+                <SafeImg src={image} alt={currentProduct.title} decoding="async" />
               </button>
             ))}
           </div>
@@ -82,12 +96,20 @@ const ProductDetails = () => {
           <p className="eyebrow">{currentProduct.brand}</p>
           <h1>{currentProduct.title}</h1>
           <p className="section-copy">{currentProduct.description}</p>
-          <div className="price-row detail-price">
-            <strong>{formatCurrency(currentProduct.price)}</strong>
+          <div className="price-row detail-price price-row--retail">
+            <div className="price-deal">
+              <strong>{formatCurrency(currentProduct.price)}</strong>
+            </div>
             {currentProduct.compareAtPrice ? (
-              <span>{formatCurrency(currentProduct.compareAtPrice)}</span>
+              <div className="price-mrp">
+                <span className="mrp-label">M.R.P.:</span>
+                <span className="mrp-value">{formatCurrency(currentProduct.compareAtPrice)}</span>
+              </div>
             ) : null}
           </div>
+          <p className="price-disclaimer muted-text">
+            Prices shown are demo values in INR (typical list / M.R.P. style); not live Amazon offers.
+          </p>
           <div className="chip-row">
             <span className="meta-chip">Category: {currentProduct.category}</span>
             <span className="meta-chip">

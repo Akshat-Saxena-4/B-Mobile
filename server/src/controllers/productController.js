@@ -90,6 +90,7 @@ export const getProducts = asyncHandler(async (req, res) => {
   }
 
   if (req.query.category) query.category = req.query.category;
+  if (req.query.subcategory) query.subcategory = req.query.subcategory;
   if (req.query.brand) query.brand = req.query.brand;
   if (req.query.seller) query.seller = req.query.seller;
   if (req.query.status && req.user?.role === ROLES.ADMIN) query.status = req.query.status;

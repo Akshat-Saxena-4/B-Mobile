@@ -17,7 +17,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin:
+      env.nodeEnv === 'development'
+        ? true
+        : env.clientUrl,
     credentials: true,
   })
 );
@@ -40,7 +43,7 @@ if (env.nodeEnv !== 'production') {
 app.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'Velora Commerce API is healthy',
+    message: 'B-mobile API is healthy',
     timestamp: new Date().toISOString(),
   });
 });

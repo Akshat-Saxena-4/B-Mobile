@@ -15,7 +15,7 @@ export const createProductFormState = (product = {}) => ({
   isFeatured: Boolean(product.isFeatured),
   images:
     product.images?.join(', ') ||
-    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=85',
   specifications:
     product.specifications?.map((item) => `${item.label}: ${item.value}`).join('\n') ||
     'Material: Premium alloy\nWarranty: 1 year',

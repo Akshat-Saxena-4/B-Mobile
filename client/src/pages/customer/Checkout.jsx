@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
 import CartSummary from '../../components/cart/CartSummary.jsx';
+import CheckoutReviewList from '../../components/cart/CheckoutReviewList.jsx';
 import couponService from '../../services/couponService.js';
 import orderService from '../../services/orderService.js';
 import { fetchCart } from '../../store/slices/cartSlice.js';
@@ -87,17 +88,23 @@ const Checkout = () => {
   };
 
   return (
-    <section className="container page-stack">
-      <div className="section-header">
+    <section className="container page-stack checkout-page">
+      <div className="section-header section-header--tight">
         <div>
           <p className="eyebrow">Checkout</p>
           <h1>Confirm shipping and complete payment.</h1>
+          <p className="section-copy checkout-page__lede">
+            Review line totals beside each photo, then add your delivery address.
+          </p>
         </div>
       </div>
 
       <div className="checkout-grid">
-        <form className="surface-card stack-list" onSubmit={handleSubmit}>
-          <div className="grid-two">
+        <div className="checkout-primary stack-list">
+          <CheckoutReviewList items={items} />
+          <form className="surface-card stack-list checkout-form-card" onSubmit={handleSubmit}>
+            <p className="checkout-form-card__title">Delivery &amp; payment</p>
+            <div className="grid-two">
             <Input
               label="Full Name"
               required
@@ -175,12 +182,13 @@ const Checkout = () => {
           ) : null}
           {error ? <div className="alert alert-error">{error}</div> : null}
 
-          <Button type="submit" fullWidth disabled={submitting}>
-            {submitting ? 'Placing order...' : 'Place Order'}
-          </Button>
-        </form>
+            <Button type="submit" fullWidth disabled={submitting}>
+              {submitting ? 'Placing order...' : 'Place Order'}
+            </Button>
+          </form>
+        </div>
 
-        <CartSummary summary={adjustedSummary} ctaLabel="Order Summary" ctaLink="/checkout" />
+        <CartSummary summary={adjustedSummary} ctaLabel="Order summary" ctaLink="/checkout" />
       </div>
     </section>
   );

@@ -12,23 +12,23 @@ const Cart = () => {
 
   if (!items.length) {
     return (
-      <section className="container empty-page">
-        <div className="empty-state">
-          Your cart is empty. Add a few standout products to start checkout.
+      <section className="container empty-page cart-page cart-page--empty">
+        <div className="empty-state empty-state--card">
+          Your cart is empty. Add devices — each tile shows price on the image and in the summary.
         </div>
         <Link to="/products">
-          <Button>Explore Products</Button>
+          <Button>Browse phones</Button>
         </Link>
       </section>
     );
   }
 
   return (
-    <section className="container page-stack">
-      <div className="section-header">
+    <section className="container page-stack cart-page">
+      <div className="section-header section-header--tight">
         <div>
           <p className="eyebrow">Cart</p>
-          <h1>Review your order before checkout.</h1>
+          <h1>Review your bag — prices are shown on every thumbnail.</h1>
         </div>
         <Button variant="ghost" onClick={() => dispatch(clearCart())}>
           Clear Cart
