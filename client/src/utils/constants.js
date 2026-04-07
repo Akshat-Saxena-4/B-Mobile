@@ -42,6 +42,78 @@ export const CATEGORY_SPOTLIGHT = [
   { name: 'Beauty Rituals', description: 'High-trust self-care picks with elegant packaging.' },
 ];
 
+/** Home hero fallback tiles when featured API is still empty (image + demo INR). */
+export const HOME_HERO_FALLBACK = [
+  {
+    key: 'hf1',
+    title: 'Flagship deals',
+    price: 89999,
+    image:
+      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=640&q=85',
+    to: '/products?category=Smartphones&subcategory=Flagship',
+  },
+  {
+    key: 'hf2',
+    title: 'Galaxy & Android',
+    price: 64999,
+    image:
+      'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=640&q=85',
+    to: '/products?category=Smartphones&brand=Samsung',
+  },
+  {
+    key: 'hf3',
+    title: 'Pixel-perfect',
+    price: 96999,
+    image:
+      'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=640&q=85',
+    to: '/products?category=Smartphones&brand=Google',
+  },
+];
+
+/** Home spotlight cards → Explore with filters (phone store). */
+export const HOME_SPOTLIGHT_LINKS = [
+  {
+    name: 'Flagship',
+    description: 'Latest chipsets, pro cameras, premium builds.',
+    to: '/products?category=Smartphones&subcategory=Flagship',
+  },
+  {
+    name: 'Mid-range',
+    description: 'Strong daily drivers without flagship tax.',
+    to: '/products?category=Smartphones&subcategory=Mid-Range',
+  },
+  {
+    name: 'Budget',
+    description: 'Big batteries and bright screens for less.',
+    to: '/products?category=Smartphones&subcategory=Budget',
+  },
+  {
+    name: 'Foldables',
+    description: 'Flexible displays for work and travel.',
+    to: '/products?category=Smartphones&subcategory=Foldables',
+  },
+];
+
+/** Explore / catalog: sort dropdown + toolbar pills share these values. */
+export const CATALOG_SORT_OPTIONS = [
+  { value: 'featured', label: 'Featured' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'priceAsc', label: 'Price ↑' },
+  { value: 'priceDesc', label: 'Price ↓' },
+  { value: 'rating', label: 'Top rated' },
+];
+
+/** One-tap presets for the phone catalog (matches seeded `category` / `subcategory`). */
+export const EXPLORE_QUICK_FILTERS = [
+  { id: 'all', label: 'All phones', patch: { category: '', subcategory: '', brand: '' } },
+  { id: 'flagship', label: 'Flagship', patch: { category: 'Smartphones', subcategory: 'Flagship', brand: '' } },
+  { id: 'mid', label: 'Mid-range', patch: { category: 'Smartphones', subcategory: 'Mid-Range', brand: '' } },
+  { id: 'budget', label: 'Budget', patch: { category: 'Smartphones', subcategory: 'Budget', brand: '' } },
+  { id: 'fold', label: 'Foldables', patch: { category: 'Smartphones', subcategory: 'Foldables', brand: '' } },
+  { id: 'apple', label: 'Apple', patch: { category: 'Smartphones', subcategory: '', brand: 'Apple' } },
+  { id: 'samsung', label: 'Samsung', patch: { category: 'Smartphones', subcategory: '', brand: 'Samsung' } },
+];
+
 export const SHOPKEEPER_NAV = [
   { label: 'Overview', path: '/seller/dashboard' },
   { label: 'Add Product', path: '/seller/products/new' },

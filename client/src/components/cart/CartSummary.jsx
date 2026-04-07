@@ -3,7 +3,7 @@ import Button from '../common/Button.jsx';
 import formatCurrency from '../../utils/formatCurrency.js';
 
 const CartSummary = ({ summary, ctaLabel = 'Proceed to Checkout', ctaLink = '/checkout' }) => (
-  <aside className="summary-card">
+  <aside className="summary-card summary-card--polished">
     <div className="summary-row">
       <span>Subtotal</span>
       <strong>{formatCurrency(summary.itemsTotal)}</strong>

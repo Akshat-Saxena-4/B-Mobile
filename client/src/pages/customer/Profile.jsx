@@ -87,15 +87,20 @@ const Profile = () => {
   };
 
   return (
-    <section className="container page-stack">
-      <div className="section-header">
+    <section className="container page-stack profile-page">
+      <div className="section-header section-header--tight">
         <div>
           <p className="eyebrow">Profile</p>
-          <h1>Manage identity, address, and business details.</h1>
+          <h1>Identity, shipping, and seller storefront settings.</h1>
+          <p className="section-copy profile-page__lede">
+            Keep your default address accurate — we use it at checkout. Avatar supports any image URL.
+          </p>
         </div>
       </div>
 
-      <form className="surface-card stack-list" onSubmit={handleSubmit}>
+      <form className="profile-form stack-list" onSubmit={handleSubmit}>
+        <div className="surface-card stack-list profile-form__card">
+          <p className="profile-form__card-title">Personal</p>
         <div className="grid-two">
           <Input
             label="First Name"
@@ -120,6 +125,10 @@ const Profile = () => {
             onChange={(event) => setForm((current) => ({ ...current, avatar: event.target.value }))}
           />
         </div>
+        </div>
+
+        <div className="surface-card stack-list profile-form__card">
+          <p className="profile-form__card-title">Default shipping address</p>
         <Input
           label="Address Line 1"
           value={form.line1}
@@ -156,10 +165,11 @@ const Profile = () => {
             onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))}
           />
         </div>
+        </div>
 
         {user?.role === ROLES.SHOPKEEPER ? (
-          <>
-            <div className="divider" />
+          <div className="surface-card stack-list profile-form__card">
+            <p className="profile-form__card-title">Seller profile</p>
             <Input
               label="Shop Name"
               value={form.shopName}
@@ -183,13 +193,15 @@ const Profile = () => {
                 setForm((current) => ({ ...current, storeDescription: event.target.value }))
               }
             />
-          </>
+          </div>
         ) : null}
 
+        <div className="profile-form__actions surface-card">
         {saved ? <div className="alert alert-success">Profile updated successfully.</div> : null}
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Changes'}
+        <Button type="submit" disabled={isLoading} fullWidth>
+          {isLoading ? 'Saving...' : 'Save changes'}
         </Button>
+        </div>
       </form>
     </section>
   );

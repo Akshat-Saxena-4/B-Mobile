@@ -58,14 +58,14 @@ const Login = ({ adminOnly = false }) => {
       : 'Login';
 
   return (
-    <section className="auth-shell container">
-      <div className="auth-panel auth-aside">
+    <section className="auth-shell auth-shell--polished container">
+      <div className="auth-panel auth-aside auth-aside--mesh">
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         <p className="section-copy">{description}</p>
       </div>
 
-      <form className="auth-panel auth-form" onSubmit={handleSubmit}>
+      <form className="auth-panel auth-form auth-form--elevated" onSubmit={handleSubmit}>
         <div>
           <p className="eyebrow">{formEyebrow}</p>
           <h2>{formTitle}</h2>

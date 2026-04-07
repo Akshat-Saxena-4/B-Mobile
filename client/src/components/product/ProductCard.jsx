@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiHeart, FiShoppingCart, FiStar } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Button from '../common/Button.jsx';
+import SafeImg from '../common/SafeImg.jsx';
 import formatCurrency from '../../utils/formatCurrency.js';
 import { fadeUp } from '../../utils/motion.js';
 
@@ -10,40 +12,85 @@ const ProductCard = ({
   onAddToCart,
   onToggleWishlist,
   isWishlisted = false,
+  showImagePriceOverlay = true,
 }) => {
+  const [hover, setHover] = useState(false);
   const wished = typeof isWishlisted === 'function' ? isWishlisted(product) : isWishlisted;
 
+  const primary = product.thumbnail || product.images?.[0];
+  const secondary = product.images?.[1];
+  const imageSrc = hover && secondary ? secondary : primary;
+
+  const discount = product.discountPercentage || 0;
+
   return (
-    <motion.article className="product-card" variants={fadeUp}>
-    <button type="button" className="wishlist-chip" onClick={() => onToggleWishlist?.(product._id)}>
-      <FiHeart className={wished ? 'filled-heart' : ''} />
-    </button>
-    <Link to={`/products/${product.slug || product._id}`} className="product-image-wrap">
-      <img src={product.thumbnail || product.images?.[0]} alt={product.title} className="product-image" />
-    </Link>
-    <div className="product-card-body">
-      <div className="product-card-topline">
-        <span>{product.brand}</span>
-        <span className="rating-chip">
-          <FiStar />
-          {product.ratings?.average || 0}
-        </span>
+    <motion.article className="product-card product-card--catalog" variants={fadeUp}>
+      <div className="product-card__badges">
+        {product.isFeatured ? <span className="product-badge product-badge--featured">Featured</span> : null}
+        {discount > 0 ? (
+          <span className="product-badge product-badge--save">{discount}% off</span>
+        ) : null}
       </div>
-      <Link to={`/products/${product.slug || product._id}`} className="product-title-link">
-        <h3>{product.title}</h3>
+      <button type="button" className="wishlist-chip" onClick={() => onToggleWishlist?.(product._id)}>
+        <FiHeart className={wished ? 'filled-heart' : ''} />
+      </button>
+      <Link
+        to={`/products/${product.slug || product._id}`}
+        className="product-image-wrap"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <SafeImg
+          src={imageSrc}
+          alt={product.title}
+          className="product-image"
+          loading="lazy"
+          decoding="async"
+        />
+        {showImagePriceOverlay ? (
+          <div className="product-card__price-overlay" aria-hidden="true">
+            <span className="product-card__price-overlay-main">{formatCurrency(product.price)}</span>
+            {product.compareAtPrice ? (
+              <span className="product-card__price-overlay-was">
+                {formatCurrency(product.compareAtPrice)}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </Link>
-      <p className="muted-text">{product.shortDescription}</p>
-      <div className="price-row">
-        <strong>{formatCurrency(product.price)}</strong>
-        {product.compareAtPrice ? <span>{formatCurrency(product.compareAtPrice)}</span> : null}
+      <div className="product-card-body">
+        <div className="product-card-topline">
+          <span className="product-card-brand">{product.brand}</span>
+          <span className="rating-chip">
+            <FiStar />
+            {product.ratings?.average || 0}
+            {product.ratings?.count ? (
+              <span className="rating-chip__count">({product.ratings.count})</span>
+            ) : null}
+          </span>
+        </div>
+        <Link to={`/products/${product.slug || product._id}`} className="product-title-link">
+          <h3>{product.title}</h3>
+        </Link>
+        <p className="muted-text product-card-desc">{product.shortDescription}</p>
+        <div className="price-row price-row--retail">
+          <div className="price-deal">
+            <strong>{formatCurrency(product.price)}</strong>
+          </div>
+          {product.compareAtPrice ? (
+            <div className="price-mrp">
+              <span className="mrp-label">M.R.P.:</span>
+              <span className="mrp-value">{formatCurrency(product.compareAtPrice)}</span>
+            </div>
+          ) : null}
+        </div>
+        {onAddToCart ? (
+          <Button variant="secondary" className="product-cta" onClick={() => onAddToCart(product)}>
+            <FiShoppingCart />
+            Add to cart
+          </Button>
+        ) : null}
       </div>
-      {onAddToCart ? (
-        <Button variant="secondary" className="product-cta" onClick={() => onAddToCart(product)}>
-          <FiShoppingCart />
-          Add to cart
-        </Button>
-      ) : null}
-    </div>
     </motion.article>
   );
 };

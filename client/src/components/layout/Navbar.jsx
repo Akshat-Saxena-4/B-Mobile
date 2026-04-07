@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FiHeart, FiMenu, FiSearch, FiShoppingBag, FiUser, FiX } from 'react-icons/fi';
 import Button from '../common/Button.jsx';
+import BMobileLogo from './BMobileLogo.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCart } from '../../hooks/useCart.js';
 import { ROLES } from '../../utils/constants.js';
@@ -33,11 +34,11 @@ const Navbar = () => {
   return (
     <header className="site-header">
       <div className="container navbar">
-        <Link to="/" className="brand-mark">
-          <span className="brand-badge">V</span>
-          <div>
-            <strong>Velora</strong>
-            <span>Premium Commerce</span>
+        <Link to="/" className="brand-mark" aria-label="B-mobile home">
+          <BMobileLogo />
+          <div className="brand-wordmark">
+            <strong className="brand-name">B-mobile</strong>
+            <span className="brand-tagline">Mobile e-commerce</span>
           </div>
         </Link>
 
@@ -46,7 +47,7 @@ const Navbar = () => {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search premium products, brands, collections"
+            placeholder="Search phones, brands, models…"
           />
         </form>
 

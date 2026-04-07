@@ -55,8 +55,8 @@ const Register = () => {
   };
 
   return (
-    <section className="auth-shell container">
-      <div className="auth-panel auth-aside">
+    <section className="auth-shell auth-shell--polished container">
+      <div className="auth-panel auth-aside auth-aside--mesh">
         <p className="eyebrow">Build With Trust</p>
         <h1>Create a customer or seller account and step into a premium commerce experience.</h1>
         <p className="section-copy">
@@ -65,7 +65,7 @@ const Register = () => {
         </p>
       </div>
 
-      <form className="auth-panel auth-form" onSubmit={handleSubmit}>
+      <form className="auth-panel auth-form auth-form--elevated" onSubmit={handleSubmit}>
         <div>
           <p className="eyebrow">New Account</p>
           <h2>Register</h2>
