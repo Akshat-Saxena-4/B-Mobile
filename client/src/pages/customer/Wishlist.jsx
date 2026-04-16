@@ -5,8 +5,10 @@ import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
 import ProductList from '../../components/product/ProductList.jsx';
 import { addToCart, toggleWishlist } from '../../store/slices/cartSlice.js';
+import { toggleCompareItem } from '../../store/slices/experienceSlice.js';
 import { useCart } from '../../hooks/useCart.js';
 import { useAuth } from '../../hooks/useAuth.js';
+import { useExperience } from '../../hooks/useExperience.js';
 import formatCurrency from '../../utils/formatCurrency.js';
 import { ROLES } from '../../utils/constants.js';
 
@@ -22,6 +24,7 @@ const Wishlist = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { wishlist } = useCart();
+  const { compare } = useExperience();
   const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState('recent');
@@ -29,6 +32,8 @@ const Wishlist = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const deferredQuery = useDeferredValue(query);
+
+  const compareIds = new Set(compare.map((item) => item._id));
 
   const filteredWishlist = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase();
@@ -51,7 +56,11 @@ const Wishlist = () => {
         case 'priceDesc':
           return right.price - left.price;
         case 'savings':
-          return (right.compareAtPrice || right.price) - right.price - ((left.compareAtPrice || left.price) - left.price);
+          return (
+            (right.compareAtPrice || right.price) -
+            right.price -
+            ((left.compareAtPrice || left.price) - left.price)
+          );
         case 'brand':
           return (left.brand || '').localeCompare(right.brand || '');
         case 'recent':
@@ -104,6 +113,16 @@ const Wishlist = () => {
     }
   };
 
+  const pinTopCompare = () => {
+    filteredWishlist.slice(0, 4).forEach((product) => {
+      if (!compareIds.has(product._id)) {
+        dispatch(toggleCompareItem(product));
+      }
+    });
+    setMessage('Top wishlist picks were pinned to the compare board.');
+    setError('');
+  };
+
   if (!wishlist.length) {
     return (
       <section className="container empty-page wishlist-page wishlist-page--empty">
@@ -118,13 +137,13 @@ const Wishlist = () => {
   }
 
   return (
-    <section className="container page-stack wishlist-page">
+    <section className="container page-stack wishlist-page wishlist-page--upgraded">
       <section className="surface-card console-hero console-hero--customer">
         <div>
           <p className="eyebrow">Wishlist</p>
-          <h1>Saved devices, cleaner comparison, and one-tap cart building.</h1>
+          <h1>Saved devices, cleaner sorting, and a direct path into compare or cart.</h1>
           <p className="section-copy">
-            Search your saved list, sort by savings or price, and move multiple favorites into the cart faster.
+            Treat this as your shortlist. Search it, sort it, add everything to cart, or pin the strongest four into the compare board.
           </p>
         </div>
         <div className="console-hero__stats">
@@ -141,8 +160,8 @@ const Wishlist = () => {
             <strong>{new Set(filteredWishlist.map((product) => product.brand).filter(Boolean)).size}</strong>
           </div>
           <div className="console-stat">
-            <span>Ready to cart</span>
-            <strong>{filteredWishlist.length}</strong>
+            <span>Compare board</span>
+            <strong>{compare.length}</strong>
           </div>
         </div>
       </section>
@@ -165,15 +184,14 @@ const Wishlist = () => {
           <div className="field">
             <span className="field-label">Quick actions</span>
             <div className="inline-actions">
-              <Button
-                variant="secondary"
-                disabled={busy || !filteredWishlist.length}
-                onClick={addAllToCart}
-              >
+              <Button variant="secondary" disabled={busy || !filteredWishlist.length} onClick={addAllToCart}>
                 {busy ? 'Adding...' : 'Add Visible Items to Cart'}
               </Button>
-              <Link to="/products">
-                <Button variant="ghost">Keep Browsing</Button>
+              <Button variant="ghost" disabled={!filteredWishlist.length} onClick={pinTopCompare}>
+                Pin Top Picks to Compare
+              </Button>
+              <Link to="/compare">
+                <Button variant="ghost">Open Compare</Button>
               </Link>
             </div>
           </div>
@@ -187,6 +205,8 @@ const Wishlist = () => {
         products={filteredWishlist}
         onAddToCart={guardedAddToCart}
         onToggleWishlist={(productId) => dispatch(toggleWishlist(productId))}
+        onToggleCompare={(product) => dispatch(toggleCompareItem(product))}
+        isCompared={(product) => compareIds.has(product._id)}
         isWishlisted
       />
     </section>

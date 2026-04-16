@@ -28,9 +28,8 @@ export const ORDER_STATUS = {
 
 export const PAYMENT_METHODS = {
   COD: 'COD',
-  CARD: 'CARD',
-  UPI: 'UPI',
-  WALLET: 'WALLET',
+  STORE_PICKUP: 'STORE_PICKUP',
+  FINANCE_CALLBACK: 'FINANCE_CALLBACK',
 };
 
 export const PAYMENT_STATUS = {
@@ -39,4 +38,3 @@ export const PAYMENT_STATUS = {
   FAILED: 'FAILED',
   REFUNDED: 'REFUNDED',
 };
-

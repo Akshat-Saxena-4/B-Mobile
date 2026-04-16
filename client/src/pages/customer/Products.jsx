@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FiSliders, FiX } from 'react-icons/fi';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { FiBarChart2, FiSliders, FiX } from 'react-icons/fi';
 import Button from '../../components/common/Button.jsx';
 import ProductFilter from '../../components/product/ProductFilter.jsx';
 import ProductList from '../../components/product/ProductList.jsx';
@@ -9,9 +9,15 @@ import ProductGridSkeleton from '../../components/product/ProductGridSkeleton.js
 import CatalogToolbar from '../../components/product/CatalogToolbar.jsx';
 import { fetchProducts, setProductFilters } from '../../store/slices/productSlice.js';
 import { addToCart, toggleWishlist } from '../../store/slices/cartSlice.js';
+import { toggleCompareItem } from '../../store/slices/experienceSlice.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js';
-import { EXPLORE_QUICK_FILTERS, ROLES } from '../../utils/constants.js';
+import { useExperience } from '../../hooks/useExperience.js';
+import {
+  DEVICE_CATEGORY_META,
+  EXPLORE_QUICK_FILTERS,
+  ROLES,
+} from '../../utils/constants.js';
 
 const GRID_STORAGE_KEY = 'bmobile-catalog-grid';
 
@@ -28,8 +34,8 @@ const defaultFilters = () => ({
 
 const readInitialGrid = () => {
   try {
-    const v = localStorage.getItem(GRID_STORAGE_KEY);
-    return v === 'compact' ? 'compact' : 'comfortable';
+    const value = localStorage.getItem(GRID_STORAGE_KEY);
+    return value === 'compact' ? 'compact' : 'comfortable';
   } catch {
     return 'comfortable';
   }
@@ -37,12 +43,9 @@ const readInitialGrid = () => {
 
 const isQuickFilterActive = (preset, filters) => {
   if (preset.id === 'all') {
-    return (
-      !(filters.category || '').trim() &&
-      !(filters.subcategory || '').trim() &&
-      !(filters.brand || '').trim()
-    );
+    return !(filters.category || '').trim() && !(filters.subcategory || '').trim() && !(filters.brand || '').trim();
   }
+
   return (
     (filters.category || '') === preset.patch.category &&
     (filters.subcategory || '') === preset.patch.subcategory &&
@@ -52,13 +55,14 @@ const isQuickFilterActive = (preset, filters) => {
 
 const buildPageList = (current, totalPages, max = 5) => {
   if (totalPages <= max) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
+
   const half = Math.floor(max / 2);
   let start = Math.max(1, current - half);
   let end = Math.min(totalPages, start + max - 1);
   start = Math.max(1, end - max + 1);
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 };
 
 const Products = () => {
@@ -66,18 +70,21 @@ const Products = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlKey = useMemo(() => searchParams.toString(), [searchParams]);
-
   const { items, meta, isLoading } = useSelector((state) => state.products);
   const { wishlist } = useSelector((state) => state.cart);
+  const { compare, recentlyViewed } = useExperience();
   const { user } = useAuth();
 
   const [searchInput, setSearchInput] = useState(() => searchParams.get('search') || '');
   const debouncedSearch = useDebouncedValue(searchInput, 380);
   const [localFilters, setLocalFilters] = useState(() => ({
     ...defaultFilters(),
+    sort: searchParams.get('sort') || 'featured',
     category: searchParams.get('category') || '',
     subcategory: searchParams.get('subcategory') || '',
     brand: searchParams.get('brand') || '',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
   }));
 
   const [gridDensity, setGridDensity] = useState(readInitialGrid);
@@ -96,18 +103,25 @@ const Products = () => {
     const category = searchParams.get('category') || '';
     const subcategory = searchParams.get('subcategory') || '';
     const brand = searchParams.get('brand') || '';
+    const minPrice = searchParams.get('minPrice') || '';
+    const maxPrice = searchParams.get('maxPrice') || '';
+    const sort = searchParams.get('sort') || 'featured';
     setSearchInput(search);
-    setLocalFilters((prev) => {
+    setLocalFilters((previous) => {
       if (
-        prev.category === category &&
-        prev.subcategory === subcategory &&
-        prev.brand === brand
+        previous.sort === sort &&
+        previous.category === category &&
+        previous.subcategory === subcategory &&
+        previous.brand === brand &&
+        previous.minPrice === minPrice &&
+        previous.maxPrice === maxPrice
       ) {
-        return prev;
+        return previous;
       }
-      return { ...prev, category, subcategory, brand, page: 1 };
+
+      return { ...previous, sort, category, subcategory, brand, minPrice, maxPrice, page: 1 };
     });
-  }, [urlKey]);
+  }, [urlKey, searchParams]);
 
   const queryParams = useMemo(
     () => ({
@@ -125,25 +139,33 @@ const Products = () => {
   }, [dispatch, queryParams]);
 
   useEffect(() => {
-    const sp = new URLSearchParams();
-    if (debouncedSearch.trim()) sp.set('search', debouncedSearch.trim());
-    if (localFilters.category) sp.set('category', localFilters.category);
-    if (localFilters.subcategory) sp.set('subcategory', localFilters.subcategory);
-    if (localFilters.brand) sp.set('brand', localFilters.brand);
-    const next = sp.toString();
+    const params = new URLSearchParams();
+    if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
+    if (localFilters.category) params.set('category', localFilters.category);
+    if (localFilters.subcategory) params.set('subcategory', localFilters.subcategory);
+    if (localFilters.brand) params.set('brand', localFilters.brand);
+    if (localFilters.minPrice) params.set('minPrice', localFilters.minPrice);
+    if (localFilters.maxPrice) params.set('maxPrice', localFilters.maxPrice);
+    if (localFilters.sort && localFilters.sort !== 'featured') params.set('sort', localFilters.sort);
+    const next = params.toString();
+
     if (next !== searchParams.toString()) {
-      setSearchParams(sp, { replace: true });
+      setSearchParams(params, { replace: true });
     }
   }, [
     debouncedSearch,
-    localFilters.category,
-    localFilters.subcategory,
     localFilters.brand,
-    setSearchParams,
+    localFilters.category,
+    localFilters.maxPrice,
+    localFilters.minPrice,
+    localFilters.sort,
+    localFilters.subcategory,
     searchParams,
+    setSearchParams,
   ]);
 
   const wishlistIds = new Set(wishlist.map((item) => item._id || item.product?._id));
+  const compareIds = new Set(compare.map((item) => item._id));
 
   const guardedCustomerAction = useCallback(
     (callback) => {
@@ -151,6 +173,7 @@ const Products = () => {
         navigate('/login');
         return;
       }
+
       callback();
     },
     [navigate, user?.role]
@@ -177,37 +200,26 @@ const Products = () => {
     setLocalFilters(defaultFilters());
   }, []);
 
-  const removeChip = useCallback((key) => {
-    if (key === 'search') {
-      setSearchInput('');
-      return;
-    }
-    onFilterChange(key, '');
-  }, [onFilterChange]);
+  const removeChip = useCallback(
+    (key) => {
+      if (key === 'search') {
+        setSearchInput('');
+        return;
+      }
+
+      onFilterChange(key, '');
+    },
+    [onFilterChange]
+  );
 
   const activeChips = useMemo(() => {
     const chips = [];
-    if (debouncedSearch.trim()) {
-      chips.push({
-        key: 'search',
-        label: `Search: “${debouncedSearch.trim()}”`,
-      });
-    }
-    if (localFilters.category?.trim()) {
-      chips.push({ key: 'category', label: `Category: ${localFilters.category}` });
-    }
-    if (localFilters.subcategory?.trim()) {
-      chips.push({ key: 'subcategory', label: `Segment: ${localFilters.subcategory}` });
-    }
-    if (localFilters.brand?.trim()) {
-      chips.push({ key: 'brand', label: `Brand: ${localFilters.brand}` });
-    }
-    if (localFilters.minPrice !== '' && localFilters.minPrice != null) {
-      chips.push({ key: 'minPrice', label: `Min ₹${localFilters.minPrice}` });
-    }
-    if (localFilters.maxPrice !== '' && localFilters.maxPrice != null) {
-      chips.push({ key: 'maxPrice', label: `Max ₹${localFilters.maxPrice}` });
-    }
+    if (debouncedSearch.trim()) chips.push({ key: 'search', label: `Search: "${debouncedSearch.trim()}"` });
+    if (localFilters.category?.trim()) chips.push({ key: 'category', label: `Category: ${localFilters.category}` });
+    if (localFilters.subcategory?.trim()) chips.push({ key: 'subcategory', label: `Segment: ${localFilters.subcategory}` });
+    if (localFilters.brand?.trim()) chips.push({ key: 'brand', label: `Brand: ${localFilters.brand}` });
+    if (localFilters.minPrice !== '' && localFilters.minPrice != null) chips.push({ key: 'minPrice', label: `Min Rs ${localFilters.minPrice}` });
+    if (localFilters.maxPrice !== '' && localFilters.maxPrice != null) chips.push({ key: 'maxPrice', label: `Max Rs ${localFilters.maxPrice}` });
     return chips;
   }, [debouncedSearch, localFilters]);
 
@@ -217,32 +229,63 @@ const Products = () => {
   const skeletonCount = gridDensity === 'compact' ? 10 : 8;
   const showFullSkeleton = isLoading && (!items || items.length === 0);
   const pageList = buildPageList(meta.page, meta.totalPages || 1);
+  const categoryMeta = DEVICE_CATEGORY_META[localFilters.category];
 
   return (
-    <section className="catalog-page">
+    <section className="catalog-page catalog-page--upgraded">
       <div className="container catalog-page-inner">
-        <header className="catalog-hero surface-card">
+        <header className="catalog-hero surface-card catalog-hero--upgraded">
           <div className="catalog-hero__copy">
-            <p className="eyebrow">Explore</p>
-            <h1>Phones, filters, and sort — built for fast browsing.</h1>
+            <p className="eyebrow">{categoryMeta?.eyebrow || 'Explore everything'}</p>
+            <h1>
+              {categoryMeta?.title
+                ? `${categoryMeta.title} with stronger discovery, clearer pricing, and faster decisions.`
+                : 'Browse phones, tablets, and laptops without losing your place.'}
+            </h1>
             <p className="section-copy">
-              Debounced search, shareable URLs, segment presets, and a grid you can tune. Prices stay in
-              INR with clear M.R.P. context on each card.
+              {categoryMeta?.description ||
+                'Search, refine, compare, and jump between device categories without resetting the whole experience.'}
             </p>
           </div>
           <dl className="catalog-hero__stats">
             <div className="catalog-stat">
-              <dt>In catalog</dt>
-              <dd>{isLoading && meta.total === 0 ? '—' : meta.total}</dd>
+              <dt>Catalog size</dt>
+              <dd>{isLoading && meta.total === 0 ? '-' : meta.total}</dd>
             </div>
             <div className="catalog-stat">
-              <dt>Page</dt>
-              <dd>
-                {meta.page} / {Math.max(meta.totalPages, 1)}
-              </dd>
+              <dt>Compare board</dt>
+              <dd>{compare.length}</dd>
+            </div>
+            <div className="catalog-stat">
+              <dt>Recently viewed</dt>
+              <dd>{recentlyViewed.length}</dd>
             </div>
           </dl>
         </header>
+
+        <div className="catalog-device-switcher">
+          {Object.entries(DEVICE_CATEGORY_META).map(([key, value]) => (
+            <button
+              key={key}
+              type="button"
+              className={`catalog-device-card${localFilters.category === key ? ' is-active' : ''}`}
+              onClick={() => patchFilters({ category: key, subcategory: '', brand: '' })}
+            >
+              <span className="catalog-device-card__eyebrow">{value.eyebrow}</span>
+              <strong>{value.title}</strong>
+              <span>{value.accent}</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`catalog-device-card${!localFilters.category ? ' is-active' : ''}`}
+            onClick={() => patchFilters({ category: '', subcategory: '', brand: '' })}
+          >
+            <span className="catalog-device-card__eyebrow">Full catalog</span>
+            <strong>All devices</strong>
+            <span>Cross-category discovery</span>
+          </button>
+        </div>
 
         <div className="catalog-quick-row">
           <p className="catalog-quick-label">Quick picks</p>
@@ -260,13 +303,29 @@ const Products = () => {
           </div>
         </div>
 
+        <section className="surface-card catalog-assistant-card">
+          <div>
+            <p className="eyebrow">Buying assistant</p>
+            <h3>Pin top picks to compare before you put anything in the cart.</h3>
+          </div>
+          <div className="catalog-assistant-card__actions">
+            <Link to="/compare" className="catalog-compare-pill is-active">
+              <FiBarChart2 />
+              <span>Open compare board ({compare.length})</span>
+            </Link>
+            <span className="muted-text">
+              Use the compare button on any card to keep your shortlist visible.
+            </span>
+          </div>
+        </section>
+
         <button
           type="button"
           className="catalog-mobile-filter-btn"
           onClick={() => setMobileFiltersOpen(true)}
         >
           <FiSliders aria-hidden />
-          Filters &amp; search
+          Filters and search
         </button>
 
         <div className="catalog-layout">
@@ -321,17 +380,17 @@ const Products = () => {
           <main className="catalog-main">
             {activeChips.length ? (
               <ul className="catalog-active-chips" aria-label="Active filters">
-                {activeChips.map((c) => (
-                  <li key={c.key}>
+                {activeChips.map((chip) => (
+                  <li key={chip.key}>
                     <span className="filter-chip">
-                      {c.label}
+                      {chip.label}
                       <button
                         type="button"
                         className="filter-chip__remove"
-                        onClick={() => removeChip(c.key)}
-                        aria-label={`Remove ${c.label}`}
+                        onClick={() => removeChip(chip.key)}
+                        aria-label={`Remove ${chip.label}`}
                       >
-                        ×
+                        x
                       </button>
                     </span>
                   </li>
@@ -353,6 +412,7 @@ const Products = () => {
               gridDensity={gridDensity}
               onGridDensityChange={setGridDensity}
               isLoading={isLoading}
+              compareCount={compare.length}
             />
 
             <div className={`catalog-results${isLoading && items?.length ? ' is-refreshing' : ''}`}>
@@ -364,13 +424,13 @@ const Products = () => {
                   gridClassName={gridClass}
                   onEmptyReset={resetFilters}
                   onAddToCart={(product) =>
-                    guardedCustomerAction(() =>
-                      dispatch(addToCart({ productId: product._id, quantity: 1 }))
-                    )
+                    guardedCustomerAction(() => dispatch(addToCart({ productId: product._id, quantity: 1 })))
                   }
                   onToggleWishlist={(productId) =>
                     guardedCustomerAction(() => dispatch(toggleWishlist(productId)))
                   }
+                  onToggleCompare={(product) => dispatch(toggleCompareItem(product))}
+                  isCompared={(product) => compareIds.has(product._id)}
                   isWishlisted={(product) => wishlistIds.has(product._id)}
                 />
               )}
@@ -378,34 +438,27 @@ const Products = () => {
 
             {meta.totalPages > 1 ? (
               <nav className="catalog-pagination" aria-label="Pagination">
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={() => patchFilters({ page: 1 })}
-                  disabled={meta.page <= 1}
-                >
+                <Button variant="ghost" type="button" onClick={() => patchFilters({ page: 1 })} disabled={meta.page <= 1}>
                   First
                 </Button>
                 <Button
                   variant="ghost"
                   type="button"
-                  onClick={() =>
-                    setLocalFilters((c) => ({ ...c, page: Math.max(c.page - 1, 1) }))
-                  }
+                  onClick={() => setLocalFilters((current) => ({ ...current, page: Math.max(current.page - 1, 1) }))}
                   disabled={meta.page <= 1}
                 >
                   Prev
                 </Button>
                 <div className="catalog-pagination__pages">
-                  {pageList.map((p) => (
+                  {pageList.map((pageNumber) => (
                     <button
-                      key={p}
+                      key={pageNumber}
                       type="button"
-                      className={`catalog-page-btn${p === meta.page ? ' is-current' : ''}`}
-                      onClick={() => setLocalFilters((c) => ({ ...c, page: p }))}
-                      aria-current={p === meta.page ? 'page' : undefined}
+                      className={`catalog-page-btn${pageNumber === meta.page ? ' is-current' : ''}`}
+                      onClick={() => setLocalFilters((current) => ({ ...current, page: pageNumber }))}
+                      aria-current={pageNumber === meta.page ? 'page' : undefined}
                     >
-                      {p}
+                      {pageNumber}
                     </button>
                   ))}
                 </div>
@@ -413,9 +466,9 @@ const Products = () => {
                   variant="ghost"
                   type="button"
                   onClick={() =>
-                    setLocalFilters((c) => ({
-                      ...c,
-                      page: Math.min(c.page + 1, meta.totalPages || 1),
+                    setLocalFilters((current) => ({
+                      ...current,
+                      page: Math.min(current.page + 1, meta.totalPages || 1),
                     }))
                   }
                   disabled={meta.page >= meta.totalPages}

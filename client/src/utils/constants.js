@@ -6,10 +6,13 @@ export const ROLES = {
 
 export const PAYMENT_OPTIONS = [
   { value: 'COD', label: 'Cash on Delivery' },
-  { value: 'CARD', label: 'Card Payment' },
-  { value: 'UPI', label: 'UPI' },
-  { value: 'WALLET', label: 'Wallet' },
+  { value: 'STORE_PICKUP', label: 'Reserve Now, Pay at Store' },
+  { value: 'FINANCE_CALLBACK', label: 'Finance Desk Callback' },
 ];
+
+export const PAYMENT_METHOD_LABELS = Object.fromEntries(
+  PAYMENT_OPTIONS.map((option) => [option.value, option.label])
+);
 
 export const ORDER_STATUS_OPTIONS = [
   { value: 'PLACED', label: 'Placed' },
@@ -35,91 +38,192 @@ export const ORDER_STEPS = [
   'DELIVERED',
 ];
 
-export const CATEGORY_SPOTLIGHT = [
-  { name: 'Smart Devices', description: 'Flagship electronics with clean industrial styling.' },
-  { name: 'Home Studio', description: 'Furniture and decor designed for calm, modern spaces.' },
-  { name: 'Fashion Edit', description: 'Premium daily essentials with elevated textures.' },
-  { name: 'Beauty Rituals', description: 'High-trust self-care picks with elegant packaging.' },
+export const COMPARE_LIMIT = 4;
+
+export const DEVICE_CATEGORY_OPTIONS = [
+  { value: '', label: 'All devices' },
+  { value: 'Smartphones', label: 'Phones' },
+  { value: 'Tablets', label: 'Tablets' },
+  { value: 'Laptops', label: 'Laptops' },
 ];
 
-/** Home hero fallback tiles when featured API is still empty (image + demo INR). */
+export const DEVICE_CATEGORY_META = {
+  Smartphones: {
+    title: 'Phones',
+    description: 'Flagships, camera phones, foldables, and value picks with a fast mobile-first checkout flow.',
+    accent: 'Pocket-first',
+    eyebrow: 'Phone zone',
+    to: '/products?category=Smartphones',
+  },
+  Tablets: {
+    title: 'Tablets',
+    description: 'Portable work, drawing, reading, and entertainment devices with stylus and keyboard-ready options.',
+    accent: 'Desk-to-couch',
+    eyebrow: 'Tablet edit',
+    to: '/products?category=Tablets',
+  },
+  Laptops: {
+    title: 'Laptops',
+    description: 'Thin-and-light productivity machines, creator workstations, and gaming rigs with clearer comparison.',
+    accent: 'Power sessions',
+    eyebrow: 'Laptop lab',
+    to: '/products?category=Laptops',
+  },
+};
+
+export const DEVICE_FEATURE_CALLOUTS = [
+  {
+    title: 'Compare before you commit',
+    body: 'Pin up to four devices, stack specs side by side, and spot the best value instantly.',
+  },
+  {
+    title: 'Finance and trade-in ready',
+    body: 'Preview monthly cost, exchange value, and delivery timing before the checkout step.',
+  },
+  {
+    title: 'Built for every screen',
+    body: 'Phone, tablet, and laptop layouts each get their own rhythm with stronger motion and touch-friendly controls.',
+  },
+];
+
 export const HOME_HERO_FALLBACK = [
   {
     key: 'hf1',
-    title: 'Flagship deals',
+    title: 'Ultra phones with launch offers',
     price: 89999,
+    compareAtPrice: 99999,
     image:
-      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=640&q=85',
+      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=720&q=85',
     to: '/products?category=Smartphones&subcategory=Flagship',
   },
   {
     key: 'hf2',
-    title: 'Galaxy & Android',
-    price: 64999,
+    title: 'Keyboard-ready tablets',
+    price: 54999,
+    compareAtPrice: 62999,
     image:
-      'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=640&q=85',
-    to: '/products?category=Smartphones&brand=Samsung',
+      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=720&q=85',
+    to: '/products?category=Tablets',
   },
   {
     key: 'hf3',
-    title: 'Pixel-perfect',
-    price: 96999,
+    title: 'Creator and gaming laptops',
+    price: 124999,
+    compareAtPrice: 139999,
     image:
-      'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=640&q=85',
-    to: '/products?category=Smartphones&brand=Google',
+      'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=720&q=85',
+    to: '/products?category=Laptops',
   },
 ];
 
-/** Home spotlight cards → Explore with filters (phone store). */
 export const HOME_SPOTLIGHT_LINKS = [
   {
-    name: 'Flagship',
-    description: 'Latest chipsets, pro cameras, premium builds.',
+    name: 'Camera phones',
+    description: 'Flagship imaging kits, portrait monsters, and creator-first Androids.',
     to: '/products?category=Smartphones&subcategory=Flagship',
     coverImage:
-      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=85',
+      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=1200&q=85',
   },
   {
-    name: 'Mid-range',
-    description: 'Strong daily drivers without flagship tax.',
-    to: '/products?category=Smartphones&subcategory=Mid-Range',
+    name: 'Study tablets',
+    description: 'Portable note-taking, reading, and streaming devices with long battery life.',
+    to: '/products?category=Tablets',
     coverImage:
-      'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=900&q=85',
+      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1200&q=85',
   },
   {
-    name: 'Budget',
-    description: 'Big batteries and bright screens for less.',
-    to: '/products?category=Smartphones&subcategory=Budget',
+    name: 'Gaming laptops',
+    description: 'High-refresh displays, dedicated graphics, and cooling built for long sessions.',
+    to: '/products?category=Laptops&subcategory=Gaming',
     coverImage:
-      'https://images.unsplash.com/photo-1556656793-08518206a384?auto=format&fit=crop&w=900&q=85',
+      'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=85',
   },
   {
-    name: 'Foldables',
-    description: 'Flexible displays for work and travel.',
-    to: '/products?category=Smartphones&subcategory=Foldables',
+    name: 'Workstation picks',
+    description: 'Thin-and-light productivity and creator machines for deep work.',
+    to: '/products?category=Laptops&subcategory=Creator',
     coverImage:
-      'https://images.unsplash.com/photo-1628744876497-eb30460be9f6?auto=format&fit=crop&w=900&q=85',
+      'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=85',
   },
 ];
 
-/** Explore / catalog: sort dropdown + toolbar pills share these values. */
+export const HOME_COLLECTIONS = [
+  {
+    key: 'phones',
+    category: 'Smartphones',
+    eyebrow: 'Phone lineup',
+    title: 'Pocket-first devices for camera, gaming, and everyday speed.',
+    copy: 'Browse foldables, premium iPhones, Android flagships, and budget 5G picks in one streamlined catalog.',
+    to: '/products?category=Smartphones',
+    cta: 'Shop phones',
+  },
+  {
+    key: 'tablets',
+    category: 'Tablets',
+    eyebrow: 'Tablet lineup',
+    title: 'Big-screen companions for study, sketching, and entertainment.',
+    copy: 'Keyboard-ready tablets and stylus-friendly slates with better filters for learning and travel.',
+    to: '/products?category=Tablets',
+    cta: 'Shop tablets',
+  },
+  {
+    key: 'laptops',
+    category: 'Laptops',
+    eyebrow: 'Laptop lineup',
+    title: 'Creator rigs, office machines, and gaming notebooks with clear trade-offs.',
+    copy: 'See performance-first, creator, and premium ultrabook models with easy comparison and finance planning.',
+    to: '/products?category=Laptops',
+    cta: 'Shop laptops',
+  },
+];
+
 export const CATALOG_SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
   { value: 'newest', label: 'Newest' },
-  { value: 'priceAsc', label: 'Price ↑' },
-  { value: 'priceDesc', label: 'Price ↓' },
+  { value: 'priceAsc', label: 'Price low-high' },
+  { value: 'priceDesc', label: 'Price high-low' },
   { value: 'rating', label: 'Top rated' },
 ];
 
-/** One-tap presets for the phone catalog (matches seeded `category` / `subcategory`). */
 export const EXPLORE_QUICK_FILTERS = [
-  { id: 'all', label: 'All phones', patch: { category: '', subcategory: '', brand: '' } },
-  { id: 'flagship', label: 'Flagship', patch: { category: 'Smartphones', subcategory: 'Flagship', brand: '' } },
-  { id: 'mid', label: 'Mid-range', patch: { category: 'Smartphones', subcategory: 'Mid-Range', brand: '' } },
-  { id: 'budget', label: 'Budget', patch: { category: 'Smartphones', subcategory: 'Budget', brand: '' } },
-  { id: 'fold', label: 'Foldables', patch: { category: 'Smartphones', subcategory: 'Foldables', brand: '' } },
-  { id: 'apple', label: 'Apple', patch: { category: 'Smartphones', subcategory: '', brand: 'Apple' } },
-  { id: 'samsung', label: 'Samsung', patch: { category: 'Smartphones', subcategory: '', brand: 'Samsung' } },
+  { id: 'all', label: 'All devices', patch: { category: '', subcategory: '', brand: '' } },
+  { id: 'phones', label: 'Phones', patch: { category: 'Smartphones', subcategory: '', brand: '' } },
+  { id: 'tablets', label: 'Tablets', patch: { category: 'Tablets', subcategory: '', brand: '' } },
+  { id: 'laptops', label: 'Laptops', patch: { category: 'Laptops', subcategory: '', brand: '' } },
+  {
+    id: 'flagship',
+    label: 'Flagship phones',
+    patch: { category: 'Smartphones', subcategory: 'Flagship', brand: '' },
+  },
+  {
+    id: 'student',
+    label: 'Student tablets',
+    patch: { category: 'Tablets', subcategory: 'Student', brand: '' },
+  },
+  {
+    id: 'creator',
+    label: 'Creator laptops',
+    patch: { category: 'Laptops', subcategory: 'Creator', brand: '' },
+  },
+  {
+    id: 'gaming',
+    label: 'Gaming laptops',
+    patch: { category: 'Laptops', subcategory: 'Gaming', brand: '' },
+  },
+];
+
+export const COMPARE_SPEC_PRIORITY = [
+  'Display',
+  'Chip',
+  'Processor',
+  'Memory',
+  'RAM',
+  'Storage',
+  'Camera',
+  'Battery',
+  'Charging',
+  'Graphics',
+  'Weight',
 ];
 
 export const SHOPKEEPER_NAV = [

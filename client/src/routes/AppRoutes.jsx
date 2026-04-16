@@ -14,6 +14,7 @@ import Checkout from '../pages/customer/Checkout.jsx';
 import Orders from '../pages/customer/Orders.jsx';
 import Profile from '../pages/customer/Profile.jsx';
 import Wishlist from '../pages/customer/Wishlist.jsx';
+import Compare from '../pages/customer/Compare.jsx';
 import ShopkeeperDashboard from '../pages/shopkeeper/Dashboard.jsx';
 import AddProduct from '../pages/shopkeeper/AddProduct.jsx';
 import ManageProducts from '../pages/shopkeeper/ManageProducts.jsx';
@@ -56,6 +57,7 @@ const AppRoutes = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:identifier" element={<ProductDetails />} />
+          <Route path="/compare" element={<Compare />} />
 
           <Route
             path="/cart"

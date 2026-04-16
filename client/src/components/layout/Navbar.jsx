@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FiHeart, FiMenu, FiSearch, FiShoppingBag, FiUser, FiX } from 'react-icons/fi';
+import {
+  FiBarChart2,
+  FiHeart,
+  FiMenu,
+  FiSearch,
+  FiShoppingBag,
+  FiUser,
+  FiX,
+} from 'react-icons/fi';
 import Button from '../common/Button.jsx';
 import BMobileLogo from './BMobileLogo.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCart } from '../../hooks/useCart.js';
+import { useExperience } from '../../hooks/useExperience.js';
 import { ROLES } from '../../utils/constants.js';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
   const { summary } = useCart();
+  const { compare } = useExperience();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
+
   const dashboardLink =
     user?.role === ROLES.ADMIN
       ? { path: '/admin', label: 'Admin Panel' }
@@ -38,7 +49,7 @@ const Navbar = () => {
           <BMobileLogo />
           <div className="brand-wordmark">
             <strong className="brand-name">B-mobile</strong>
-            <span className="brand-tagline">Mobile e-commerce</span>
+            <span className="brand-tagline">Phones, tablets, laptops</span>
           </div>
         </Link>
 
@@ -47,17 +58,23 @@ const Navbar = () => {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search phones, brands, models…"
+            placeholder="Search phones, tablets, laptops..."
           />
         </form>
 
         <nav className="desktop-nav desktop-only">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/products">Explore</NavLink>
+          <NavLink to="/compare">Compare</NavLink>
           {dashboardLink ? <NavLink to={dashboardLink.path}>{dashboardLink.label}</NavLink> : null}
         </nav>
 
         <div className="nav-actions">
+          <NavLink to="/compare" className="icon-button cart-badge" aria-label="Compare devices">
+            <FiBarChart2 />
+            {compare.length ? <span>{compare.length}</span> : null}
+          </NavLink>
+
           {user?.role === ROLES.CUSTOMER ? (
             <>
               <NavLink to="/wishlist" className="icon-button desktop-only" aria-label="Wishlist">
@@ -117,6 +134,9 @@ const Navbar = () => {
             </NavLink>
             <NavLink onClick={() => setIsMenuOpen(false)} to="/products">
               Explore
+            </NavLink>
+            <NavLink onClick={() => setIsMenuOpen(false)} to="/compare">
+              Compare
             </NavLink>
             {user?.role === ROLES.CUSTOMER ? (
               <>

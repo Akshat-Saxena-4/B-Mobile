@@ -1,33 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
 
-  --bg: #f0f4ff;
-  --bg-alt: #faf8ff;
-  --surface: rgba(255, 255, 255, 0.82);
+  --bg: #eef4f7;
+  --bg-alt: #f8fbfd;
+  --surface: rgba(255, 255, 255, 0.84);
   --surface-strong: #ffffff;
-  --surface-dark: #111827;
-  --text: #0f172a;
-  --text-soft: #55607a;
-  --border: rgba(15, 23, 42, 0.07);
-  --line: rgba(17, 24, 39, 0.09);
+  --surface-dark: #101a24;
+  --text: #102033;
+  --text-soft: #5f7184;
+  --border: rgba(12, 32, 57, 0.08);
+  --line: rgba(16, 32, 51, 0.1);
 
-  --primary: #4f46e5;
-  --primary-dark: #3730a3;
-  --primary-soft: rgba(79, 70, 229, 0.12);
+  --primary: #0f6c74;
+  --primary-dark: #0c5056;
+  --primary-soft: rgba(15, 108, 116, 0.12);
   --secondary: #f59e0b;
-  --secondary-soft: rgba(245, 158, 11, 0.2);
+  --secondary-soft: rgba(245, 158, 11, 0.18);
   --accent-cyan: #06b6d4;
-  --accent-fuchsia: #d946ef;
+  --accent-fuchsia: #ef8e3c;
   --success: #0d9488;
   --danger: #dc2626;
-  --shadow: 0 24px 80px rgba(49, 46, 129, 0.12);
-  --shadow-glow: 0 0 80px rgba(79, 70, 229, 0.15);
+  --shadow: 0 28px 80px rgba(16, 32, 51, 0.12);
+  --shadow-glow: 0 0 80px rgba(15, 108, 116, 0.16);
   --radius: 24px;
   --radius-sm: 16px;
   --radius-xs: 12px;
-  --container: 1180px;
+  --container: 1220px;
 }
-

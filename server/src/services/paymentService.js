@@ -10,7 +10,6 @@ export const normalizePaymentMethod = (paymentMethod) => {
 
 export const buildPaymentSnapshot = (paymentMethod) => ({
   method: paymentMethod,
-  status: paymentMethod === PAYMENT_METHODS.COD ? PAYMENT_STATUS.PENDING : PAYMENT_STATUS.PAID,
-  transactionId: paymentMethod === PAYMENT_METHODS.COD ? '' : `TXN-${Date.now()}`,
+  status: PAYMENT_STATUS.PENDING,
+  transactionId: '',
 });
-

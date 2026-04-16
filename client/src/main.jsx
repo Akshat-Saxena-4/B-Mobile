@@ -6,6 +6,7 @@ import App from './App.jsx';
 import store from './store/store.js';
 import './styles/variables.css';
 import './styles/global.css';
+import './styles/storefront.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -16,4 +17,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </Provider>
   </React.StrictMode>
 );
-

@@ -9,7 +9,7 @@ import { addToCart } from '../../store/slices/cartSlice.js';
 import orderService from '../../services/orderService.js';
 import { formatDate, formatDateTime } from '../../utils/formatDate.js';
 import formatCurrency from '../../utils/formatCurrency.js';
-import { ORDER_STATUS_OPTIONS } from '../../utils/constants.js';
+import { ORDER_STATUS_OPTIONS, PAYMENT_METHOD_LABELS } from '../../utils/constants.js';
 import { formatOrderStatusLabel } from '../../utils/orderStatus.js';
 
 const STATUS_FILTER_OPTIONS = [{ value: 'ALL', label: 'All orders' }, ...ORDER_STATUS_OPTIONS];
@@ -210,7 +210,9 @@ const Orders = () => {
                 </div>
 
                 <div className="data-points">
-                  <span className="meta-chip">Payment {order.payment?.method}</span>
+                  <span className="meta-chip">
+                    {PAYMENT_METHOD_LABELS[order.payment?.method] || order.payment?.method}
+                  </span>
                   <span className="meta-chip">Tracking {order.fulfillment?.trackingId || 'Pending'}</span>
                   <span className="meta-chip">ETA {formatDate(order.fulfillment?.estimatedDelivery)}</span>
                 </div>

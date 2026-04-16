@@ -117,7 +117,7 @@
     grandTotal: Number
   },
   payment: {
-    method: 'COD' | 'CARD' | 'UPI' | 'WALLET',
+    method: 'COD' | 'STORE_PICKUP' | 'FINANCE_CALLBACK',
     status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED',
     transactionId: String
   },

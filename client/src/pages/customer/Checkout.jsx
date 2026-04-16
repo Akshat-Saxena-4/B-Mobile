@@ -11,8 +11,15 @@ import { fetchCart } from '../../store/slices/cartSlice.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCart } from '../../hooks/useCart.js';
 import { PAYMENT_OPTIONS } from '../../utils/constants.js';
+import { calculateEmi, estimateDeliveryWindow } from '../../utils/commerceTools.js';
 import { formatDateRange } from '../../utils/formatDate.js';
 import formatCurrency from '../../utils/formatCurrency.js';
+
+const submitLabelMap = {
+  COD: 'Place COD Order',
+  STORE_PICKUP: 'Reserve for Store Pickup',
+  FINANCE_CALLBACK: 'Request Finance Callback',
+};
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -32,7 +39,7 @@ const Checkout = () => {
     state: user?.addresses?.[0]?.state || '',
     postalCode: user?.addresses?.[0]?.postalCode || '',
     country: user?.addresses?.[0]?.country || 'India',
-    paymentMethod: 'COD',
+    paymentMethod: 'STORE_PICKUP',
   });
 
   const adjustedSummary = useMemo(
@@ -43,6 +50,22 @@ const Checkout = () => {
     [couponState?.discountAmount, summary]
   );
 
+  const deliveryEstimate = useMemo(
+    () => estimateDeliveryWindow(form.postalCode),
+    [form.postalCode]
+  );
+
+  const emiEstimate = useMemo(
+    () =>
+      calculateEmi({
+        principal: adjustedSummary.grandTotal,
+        months: 12,
+        annualRate: 14,
+        downPayment: Math.min(adjustedSummary.grandTotal * 0.1, 15000),
+      }),
+    [adjustedSummary.grandTotal]
+  );
+
   if (!items.length) {
     return (
       <section className="container empty-page checkout-page checkout-page--empty">
@@ -50,7 +73,7 @@ const Checkout = () => {
           Your cart is empty, so there is nothing to check out yet.
         </div>
         <Link to="/products">
-          <Button>Browse phones</Button>
+          <Button>Browse catalog</Button>
         </Link>
       </section>
     );
@@ -107,13 +130,14 @@ const Checkout = () => {
   };
 
   return (
-    <section className="container page-stack checkout-page">
+    <section className="container page-stack checkout-page checkout-page--upgraded">
       <section className="surface-card console-hero console-hero--customer">
         <div>
           <p className="eyebrow">Checkout</p>
-          <h1>Review delivery, apply savings, and place the order with more confidence.</h1>
+          <h1>Reserve devices, schedule payment later, and still keep the final step polished.</h1>
           <p className="section-copy">
-            Your address, payment method, and final amount are grouped together so the last step feels cleaner and faster.
+            This checkout is built for a no-gateway phase, with cash on delivery, store pickup reservation,
+            and finance callback options that still feel premium.
           </p>
         </div>
         <div className="console-hero__stats">
@@ -149,37 +173,37 @@ const Checkout = () => {
                   <strong>{formatDateRange(new Date(), new Date(Date.now() + 5 * 24 * 60 * 60 * 1000))}</strong>
                 </div>
                 <div className="info-item">
-                  <span>Ship to</span>
-                  <strong>{[form.line1, form.city, form.state].filter(Boolean).join(', ') || 'Add your address below'}</strong>
+                  <span>PIN code planning</span>
+                  <strong>{deliveryEstimate.label}</strong>
                 </div>
                 <div className="info-item">
-                  <span>Payment flow</span>
-                  <strong>{PAYMENT_OPTIONS.find((option) => option.value === form.paymentMethod)?.label}</strong>
+                  <span>Courier estimate</span>
+                  <strong>{deliveryEstimate.etaDays ? `${deliveryEstimate.etaDays} days` : 'Pending PIN code'}</strong>
                 </div>
               </div>
             </article>
 
             <article className="surface-card">
-              <p className="eyebrow">Checkout tips</p>
+              <p className="eyebrow">Finance planning</p>
               <div className="info-list">
                 <div className="info-item">
-                  <span>Address accuracy</span>
-                  <strong>Use the phone number that should receive courier updates.</strong>
+                  <span>Approx. monthly EMI</span>
+                  <strong>{formatCurrency(emiEstimate.monthlyInstallment)}</strong>
                 </div>
                 <div className="info-item">
-                  <span>Coupon note</span>
-                  <strong>{couponState ? `${couponState.code} is applied successfully` : 'Try a valid coupon code before placing the order'}</strong>
+                  <span>Down payment used</span>
+                  <strong>{formatCurrency(Math.min(adjustedSummary.grandTotal * 0.1, 15000))}</strong>
                 </div>
                 <div className="info-item">
-                  <span>Order safety</span>
-                  <strong>You will be able to track the shipment from your Orders page after purchase.</strong>
+                  <span>Why this matters</span>
+                  <strong>Finance callback orders help the store follow up without taking payment online.</strong>
                 </div>
               </div>
             </article>
           </div>
 
           <form className="surface-card stack-list checkout-form-card" onSubmit={handleSubmit}>
-            <p className="checkout-form-card__title">Delivery &amp; payment</p>
+            <p className="checkout-form-card__title">Delivery and reservation details</p>
             <div className="grid-two">
               <Input
                 label="Full Name"
@@ -224,12 +248,10 @@ const Checkout = () => {
                 label="Postal Code"
                 required
                 value={form.postalCode}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, postalCode: event.target.value }))
-                }
+                onChange={(event) => setForm((current) => ({ ...current, postalCode: event.target.value }))}
               />
               <Input
-                label="Payment Method"
+                label="Checkout flow"
                 as="select"
                 options={PAYMENT_OPTIONS}
                 value={form.paymentMethod}
@@ -258,8 +280,21 @@ const Checkout = () => {
             ) : null}
             {error ? <div className="alert alert-error">{error}</div> : null}
 
+            <div className="info-list">
+              <div className="info-item">
+                <span>Selected flow</span>
+                <strong>{PAYMENT_OPTIONS.find((option) => option.value === form.paymentMethod)?.label}</strong>
+              </div>
+              <div className="info-item">
+                <span>Gateway status</span>
+                <strong>Not required for this build. Orders remain tracked inside the platform.</strong>
+              </div>
+            </div>
+
             <Button type="submit" fullWidth disabled={submitting}>
-              {submitting ? 'Placing order...' : `Place Order | ${formatCurrency(adjustedSummary.grandTotal)}`}
+              {submitting
+                ? 'Submitting...'
+                : `${submitLabelMap[form.paymentMethod]} | ${formatCurrency(adjustedSummary.grandTotal)}`}
             </Button>
           </form>
         </div>

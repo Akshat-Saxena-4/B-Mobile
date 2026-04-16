@@ -218,7 +218,7 @@ Protected for `CUSTOMER`.
     "postalCode": "400001",
     "country": "India"
   },
-  "paymentMethod": "UPI",
+  "paymentMethod": "STORE_PICKUP",
   "couponCode": "VELORA10"
 }
 ```
@@ -327,4 +327,3 @@ Returns:
 - recent orders
 - seller approval queue
 - role distribution
-
