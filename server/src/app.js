@@ -5,6 +5,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import env from './config/env.js';
+import { getDatabaseStatus, isDatabaseConnected } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
@@ -56,14 +57,44 @@ app.get('/', (req, res) => {
     success: true,
     message: 'B-mobile backend is running',
     environment: env.nodeEnv,
+    database: getDatabaseStatus(),
   });
 });
 
 app.get('/health', (req, res) => {
+  const database = getDatabaseStatus();
+
   res.json({
     success: true,
-    message: 'B-mobile API is healthy',
+    message: 'B-mobile API process is running',
     timestamp: new Date().toISOString(),
+    database,
+  });
+});
+
+app.get('/ready', (req, res) => {
+  const database = getDatabaseStatus();
+  const ready = database.connected;
+
+  res.status(ready ? 200 : 503).json({
+    success: ready,
+    message: ready
+      ? 'B-mobile API is ready to serve requests'
+      : 'B-mobile API is waiting for the database connection',
+    timestamp: new Date().toISOString(),
+    database,
+  });
+});
+
+app.use('/api/v1', (req, res, next) => {
+  if (isDatabaseConnected()) {
+    return next();
+  }
+
+  res.status(503).json({
+    success: false,
+    message: 'Database is not connected yet. Please try again shortly.',
+    database: getDatabaseStatus(),
   });
 });
 
