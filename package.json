@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "npm-run-all --parallel dev:server dev:client",
+    "start": "npm --workspace server run start",
     "dev:client": "npm --workspace client run dev",
     "dev:server": "npm --workspace server run dev",
     "build": "npm --workspace client run build",

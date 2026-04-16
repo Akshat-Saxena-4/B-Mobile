@@ -107,17 +107,18 @@ npm run dev:server
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/premium-commerce
-JWT_SECRET=replace-with-a-strong-secret
+MONGODB_URI=your-mongodb-atlas-uri
+JWT_SECRET=generate-a-strong-random-secret
 JWT_EXPIRES_IN=7d
 ADMIN_REGISTER_SECRET=replace-with-an-admin-invite-code
-CLIENT_URL=http://localhost:5173
+CLIENT_URLS=http://localhost:5173,https://b-mobile.netlify.app
+SEED_DEMO_CATALOG_ON_START=false
 ```
 
 ### Client
 
 ```env
-VITE_API_URL=http://localhost:5000/api/v1
+VITE_API_URL=https://your-render-service.onrender.com/api/v1
 ```
 
 ## Notes
@@ -126,10 +127,29 @@ VITE_API_URL=http://localhost:5000/api/v1
 - `Admin` registration is protected by `ADMIN_REGISTER_SECRET`
 - Product archival is implemented as a soft delete
 - Coupon validation is exposed separately for checkout previews
+- Render should provide `PORT` automatically in production
+- The frontend must set `VITE_API_URL` in Netlify; otherwise the catalog will not be able to reach Render
+- The backend must set `CLIENT_URLS` in Render to include your exact Netlify site URL
+- Run `npm run seed:phones` after connecting MongoDB, or temporarily set `SEED_DEMO_CATALOG_ON_START=true` to bootstrap an empty catalog once
+
+## Deployment
+
+### Backend on Render
+
+- Deploy the repository with `render.yaml`, or create a web service pointing at the `server` directory.
+- Set `MONGODB_URI`, `JWT_SECRET`, `ADMIN_REGISTER_SECRET`, and `CLIENT_URLS`.
+- Keep the health check path as `/health`.
+- If you want demo products on first boot, set `SEED_DEMO_CATALOG_ON_START=true`, let the service start once, then turn it back to `false`.
+
+### Frontend on Netlify
+
+- Netlify can build from the repository root using `netlify.toml`.
+- Publish directory should be `client/dist`.
+- Set `VITE_API_URL=https://your-render-service.onrender.com/api/v1`.
+- SPA routing is handled by `client/public/_redirects`, so direct refreshes on routes like `/products/iphone-16` work in production.
 
 ## Documentation
 
 - [Implementation](./docs/IMPLEMENTATION.md)
 - [Database Schema](./docs/DATABASE_SCHEMA.md)
 - [API Documentation](./docs/API.md)
-

@@ -124,7 +124,7 @@ export const getProducts = asyncHandler(async (req, res) => {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(1, Math.ceil(total / limit)),
     },
   });
 });
@@ -154,7 +154,7 @@ export const getProductByIdentifier = asyncHandler(async (req, res) => {
 
   const product = await populateProduct(Product.findOne(query));
 
-  if (!product || (!product.isActive && req.user?.role !== ROLES.ADMIN)) {
+  if (!product || !product.isActive || product.status !== PRODUCT_STATUS.PUBLISHED) {
     res.status(404);
     throw new Error('Product not found');
   }

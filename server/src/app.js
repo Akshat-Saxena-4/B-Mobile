@@ -14,19 +14,27 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 
 const app = express();
+const allowedOrigins = new Set(env.clientUrls);
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || env.nodeEnv === 'development' || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
 
-/* Avoid 304 + empty body on API JSON — axios rejects non-2xx, so clients would keep an empty catalog. */
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+// Avoid 304 + empty JSON responses on API requests.
 app.set('etag', false);
+app.set('trust proxy', 1);
 
-app.use(
-  cors({
-    origin:
-      env.nodeEnv === 'development'
-        ? true
-        : env.clientUrl,
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: '2mb' }));
@@ -42,6 +50,14 @@ app.use(
 if (env.nodeEnv !== 'production') {
   app.use(morgan('dev'));
 }
+
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'B-mobile backend is running',
+    environment: env.nodeEnv,
+  });
+});
 
 app.get('/health', (req, res) => {
   res.json({
@@ -62,4 +78,3 @@ app.use(notFound);
 app.use(errorHandler);
 
 export default app;
-

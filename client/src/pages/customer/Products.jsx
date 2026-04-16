@@ -13,6 +13,7 @@ import { toggleCompareItem } from '../../store/slices/experienceSlice.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js';
 import { useExperience } from '../../hooks/useExperience.js';
+import { isApiBaseUrlConfigured } from '../../services/api.js';
 import {
   DEVICE_CATEGORY_META,
   EXPLORE_QUICK_FILTERS,
@@ -70,7 +71,7 @@ const Products = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlKey = useMemo(() => searchParams.toString(), [searchParams]);
-  const { items, meta, isLoading } = useSelector((state) => state.products);
+  const { items, meta, isLoading, error } = useSelector((state) => state.products);
   const { wishlist } = useSelector((state) => state.cart);
   const { compare, recentlyViewed } = useExperience();
   const { user } = useAuth();
@@ -228,8 +229,14 @@ const Products = () => {
 
   const skeletonCount = gridDensity === 'compact' ? 10 : 8;
   const showFullSkeleton = isLoading && (!items || items.length === 0);
+  const showErrorState = Boolean(error) && !isLoading && (!items || items.length === 0);
   const pageList = buildPageList(meta.page, meta.totalPages || 1);
   const categoryMeta = DEVICE_CATEGORY_META[localFilters.category];
+  const shouldShowDeployHint =
+    Boolean(error) &&
+    !isApiBaseUrlConfigured &&
+    typeof window !== 'undefined' &&
+    !['localhost', '127.0.0.1'].includes(window.location.hostname);
 
   return (
     <section className="catalog-page catalog-page--upgraded">
@@ -415,9 +422,45 @@ const Products = () => {
               compareCount={compare.length}
             />
 
+            {error ? (
+              <div className="alert alert-error">
+                <strong>Catalog unavailable.</strong> {error}
+                {shouldShowDeployHint ? (
+                  <div className="muted-text">
+                    Set `VITE_API_URL` on Netlify to your Render `/api/v1` URL and add your Netlify
+                    domain to the Render `CLIENT_URLS` allowlist.
+                  </div>
+                ) : null}
+                <div className="inline-actions">
+                  <Button type="button" variant="ghost" onClick={() => dispatch(fetchProducts(queryParams))}>
+                    Retry catalog
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             <div className={`catalog-results${isLoading && items?.length ? ' is-refreshing' : ''}`}>
               {showFullSkeleton ? (
                 <ProductGridSkeleton count={skeletonCount} gridClassName={gridClass} />
+              ) : showErrorState ? (
+                <div className="catalog-empty">
+                  <div className="catalog-empty__card surface-card">
+                    <p className="eyebrow">Catalog error</p>
+                    <h2>The storefront could not load products from the API.</h2>
+                    <p className="section-copy">
+                      This usually means the backend URL, CORS allowlist, or database catalog on the
+                      deployed environment still needs attention.
+                    </p>
+                    <div className="catalog-empty__actions">
+                      <Button type="button" onClick={() => dispatch(fetchProducts(queryParams))}>
+                        Retry catalog
+                      </Button>
+                      <Link to="/">
+                        <Button variant="ghost">Back to home</Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <ProductList
                   products={items}
