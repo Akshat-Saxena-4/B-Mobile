@@ -24,6 +24,7 @@ const parseBoolean = (value, fallback = false) => {
 const clientUrls = parseOriginList(
   process.env.CLIENT_URLS,
   process.env.CLIENT_URL,
+  'https://b-mobile.netlify.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 );
@@ -53,10 +54,6 @@ if (env.nodeEnv === 'production') {
 
   if (!process.env.ADMIN_REGISTER_SECRET) {
     missing.push('ADMIN_REGISTER_SECRET');
-  }
-
-  if (!process.env.CLIENT_URLS && !process.env.CLIENT_URL) {
-    missing.push('CLIENT_URLS');
   }
 
   if (missing.length) {

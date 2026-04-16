@@ -111,14 +111,14 @@ MONGODB_URI=your-mongodb-atlas-uri
 JWT_SECRET=generate-a-strong-random-secret
 JWT_EXPIRES_IN=7d
 ADMIN_REGISTER_SECRET=replace-with-an-admin-invite-code
-CLIENT_URLS=http://localhost:5173,https://b-mobile.netlify.app
+CLIENT_URLS=https://b-mobile.netlify.app,http://localhost:5173
 SEED_DEMO_CATALOG_ON_START=false
 ```
 
 ### Client
 
 ```env
-VITE_API_URL=https://your-render-service.onrender.com/api/v1
+VITE_API_URL=https://b-mobile-qj9o.onrender.com/api/v1
 ```
 
 ## Notes
@@ -128,8 +128,8 @@ VITE_API_URL=https://your-render-service.onrender.com/api/v1
 - Product archival is implemented as a soft delete
 - Coupon validation is exposed separately for checkout previews
 - Render should provide `PORT` automatically in production
-- The frontend must set `VITE_API_URL` in Netlify; otherwise the catalog will not be able to reach Render
-- The backend must set `CLIENT_URLS` in Render to include your exact Netlify site URL
+- The frontend can fall back to `https://b-mobile-qj9o.onrender.com/api/v1` when it is running on `https://b-mobile.netlify.app`
+- The backend can fall back to allowing `https://b-mobile.netlify.app` even if `CLIENT_URLS` is omitted
 - Run `npm run seed:phones` after connecting MongoDB, or temporarily set `SEED_DEMO_CATALOG_ON_START=true` to bootstrap an empty catalog once
 
 ## Deployment
@@ -137,7 +137,7 @@ VITE_API_URL=https://your-render-service.onrender.com/api/v1
 ### Backend on Render
 
 - Deploy the repository with `render.yaml`, or create a web service pointing at the `server` directory.
-- Set `MONGODB_URI`, `JWT_SECRET`, `ADMIN_REGISTER_SECRET`, and `CLIENT_URLS`.
+- Set `MONGODB_URI`, `JWT_SECRET`, and `ADMIN_REGISTER_SECRET`.
 - Keep the health check path as `/health`.
 - If you want demo products on first boot, set `SEED_DEMO_CATALOG_ON_START=true`, let the service start once, then turn it back to `false`.
 
@@ -145,7 +145,7 @@ VITE_API_URL=https://your-render-service.onrender.com/api/v1
 
 - Netlify can build from the repository root using `netlify.toml`.
 - Publish directory should be `client/dist`.
-- Set `VITE_API_URL=https://your-render-service.onrender.com/api/v1`.
+- Set `VITE_API_URL=https://b-mobile-qj9o.onrender.com/api/v1`.
 - SPA routing is handled by `client/public/_redirects`, so direct refreshes on routes like `/products/iphone-16` work in production.
 
 ## Documentation
