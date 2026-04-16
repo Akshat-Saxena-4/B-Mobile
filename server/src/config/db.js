@@ -57,6 +57,7 @@ const connectDB = async () => {
 
   try {
     await mongoose.connect(env.mongoUri, {
+      family: 4,
       serverSelectionTimeoutMS: 15000,
     });
     lastConnectionError = null;
