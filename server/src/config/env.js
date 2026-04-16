@@ -31,11 +31,11 @@ const clientUrls = parseOriginList(
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 5000),
-  mongoUri: process.env.MONGODB_URI || 'mongodb+srv://akshatsaxena4096_db_user:Akshataarav@cluster0.vxbbiuw.mongodb.net/?appName=Cluster0',
-  jwtSecret: process.env.JWT_SECRET || '6a14ab16b8d5fb7d80ddb4e7bb364e479174f56f893b42c015cce13cde9752f585a286be5a9cd6ce80d94c68d7a024d9f20dc0b4115775f349dc0f19668639ca',
+  mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/premium-commerce',
+  jwtSecret: process.env.JWT_SECRET || 'replace-with-a-strong-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   adminRegisterSecret: process.env.ADMIN_REGISTER_SECRET || 'admin-secret',
-  clientUrl: clientUrls[0] || 'http://localhost:5173',https://b-mobile.netlify.app ,
+  clientUrl: clientUrls[0] || 'http://localhost:5173',
   clientUrls,
   seedDemoCatalogOnStart: parseBoolean(process.env.SEED_DEMO_CATALOG_ON_START),
 };
