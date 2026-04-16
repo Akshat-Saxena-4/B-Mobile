@@ -76,21 +76,29 @@ export const HOME_SPOTLIGHT_LINKS = [
     name: 'Flagship',
     description: 'Latest chipsets, pro cameras, premium builds.',
     to: '/products?category=Smartphones&subcategory=Flagship',
+    coverImage:
+      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=85',
   },
   {
     name: 'Mid-range',
     description: 'Strong daily drivers without flagship tax.',
     to: '/products?category=Smartphones&subcategory=Mid-Range',
+    coverImage:
+      'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=900&q=85',
   },
   {
     name: 'Budget',
     description: 'Big batteries and bright screens for less.',
     to: '/products?category=Smartphones&subcategory=Budget',
+    coverImage:
+      'https://images.unsplash.com/photo-1556656793-08518206a384?auto=format&fit=crop&w=900&q=85',
   },
   {
     name: 'Foldables',
     description: 'Flexible displays for work and travel.',
     to: '/products?category=Smartphones&subcategory=Foldables',
+    coverImage:
+      'https://images.unsplash.com/photo-1628744876497-eb30460be9f6?auto=format&fit=crop&w=900&q=85',
   },
 ];
 

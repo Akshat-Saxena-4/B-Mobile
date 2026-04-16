@@ -90,15 +90,22 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.data;
-        state.meta = action.payload.meta;
+        const rows = action.payload?.data;
+        state.items = Array.isArray(rows) ? rows : [];
+        const m = action.payload?.meta;
+        state.meta = {
+          page: m?.page ?? 1,
+          limit: m?.limit ?? 12,
+          total: m?.total ?? 0,
+          totalPages: m?.totalPages ?? 1,
+        };
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
       .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
-        state.featured = action.payload;
+        state.featured = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchProductDetails.pending, (state) => {
         state.isLoading = true;

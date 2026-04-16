@@ -175,6 +175,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 export const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ customer: req.user._id })
     .populate('items.product', 'title slug thumbnail')
+    .populate('items.seller', 'firstName lastName sellerProfile.shopName')
     .sort({ createdAt: -1 });
 
   res.json({
@@ -192,6 +193,7 @@ export const getSellerOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find(query)
     .populate('customer', 'firstName lastName email')
     .populate('items.product', 'title slug thumbnail')
+    .populate('items.seller', 'firstName lastName sellerProfile.shopName')
     .sort({ createdAt: -1 });
 
   res.json({
@@ -209,6 +211,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
 
   const orders = await Order.find(filter)
     .populate('customer', 'firstName lastName email')
+    .populate('items.seller', 'firstName lastName sellerProfile.shopName')
     .sort({ createdAt: -1 });
 
   res.json({

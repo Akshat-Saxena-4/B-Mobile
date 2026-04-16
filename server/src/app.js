@@ -15,6 +15,9 @@ import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 
 const app = express();
 
+/* Avoid 304 + empty body on API JSON — axios rejects non-2xx, so clients would keep an empty catalog. */
+app.set('etag', false);
+
 app.use(
   cors({
     origin:

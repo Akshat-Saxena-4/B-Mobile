@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
 import Input from '../../components/common/Input.jsx';
 import CartSummary from '../../components/cart/CartSummary.jsx';
@@ -11,6 +11,8 @@ import { fetchCart } from '../../store/slices/cartSlice.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useCart } from '../../hooks/useCart.js';
 import { PAYMENT_OPTIONS } from '../../utils/constants.js';
+import { formatDateRange } from '../../utils/formatDate.js';
+import formatCurrency from '../../utils/formatCurrency.js';
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -33,20 +35,37 @@ const Checkout = () => {
     paymentMethod: 'COD',
   });
 
-  const adjustedSummary = {
-    ...summary,
-    grandTotal: Math.max(summary.grandTotal - (couponState?.discountAmount || 0), 0),
-  };
+  const adjustedSummary = useMemo(
+    () => ({
+      ...summary,
+      grandTotal: Math.max(summary.grandTotal - (couponState?.discountAmount || 0), 0),
+    }),
+    [couponState?.discountAmount, summary]
+  );
+
+  if (!items.length) {
+    return (
+      <section className="container empty-page checkout-page checkout-page--empty">
+        <div className="empty-state empty-state--card">
+          Your cart is empty, so there is nothing to check out yet.
+        </div>
+        <Link to="/products">
+          <Button>Browse phones</Button>
+        </Link>
+      </section>
+    );
+  }
 
   const applyCoupon = async () => {
-    if (!couponCode) return;
+    if (!couponCode.trim()) return;
 
     try {
       const response = await couponService.validateCoupon({
-        code: couponCode,
+        code: couponCode.trim().toUpperCase(),
         subtotal: summary.itemsTotal,
       });
       setCouponState(response);
+      setCouponCode(response.code);
       setError('');
     } catch (requestError) {
       setCouponState(null);
@@ -89,101 +108,158 @@ const Checkout = () => {
 
   return (
     <section className="container page-stack checkout-page">
-      <div className="section-header section-header--tight">
+      <section className="surface-card console-hero console-hero--customer">
         <div>
           <p className="eyebrow">Checkout</p>
-          <h1>Confirm shipping and complete payment.</h1>
-          <p className="section-copy checkout-page__lede">
-            Review line totals beside each photo, then add your delivery address.
+          <h1>Review delivery, apply savings, and place the order with more confidence.</h1>
+          <p className="section-copy">
+            Your address, payment method, and final amount are grouped together so the last step feels cleaner and faster.
           </p>
         </div>
-      </div>
+        <div className="console-hero__stats">
+          <div className="console-stat">
+            <span>Items</span>
+            <strong>{summary.count}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Subtotal</span>
+            <strong>{formatCurrency(summary.itemsTotal)}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Discount</span>
+            <strong>{formatCurrency(couponState?.discountAmount || 0)}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Final total</span>
+            <strong>{formatCurrency(adjustedSummary.grandTotal)}</strong>
+          </div>
+        </div>
+      </section>
 
       <div className="checkout-grid">
         <div className="checkout-primary stack-list">
           <CheckoutReviewList items={items} />
+
+          <div className="dashboard-two-up">
+            <article className="surface-card">
+              <p className="eyebrow">Delivery outlook</p>
+              <div className="info-list">
+                <div className="info-item">
+                  <span>Estimated window</span>
+                  <strong>{formatDateRange(new Date(), new Date(Date.now() + 5 * 24 * 60 * 60 * 1000))}</strong>
+                </div>
+                <div className="info-item">
+                  <span>Ship to</span>
+                  <strong>{[form.line1, form.city, form.state].filter(Boolean).join(', ') || 'Add your address below'}</strong>
+                </div>
+                <div className="info-item">
+                  <span>Payment flow</span>
+                  <strong>{PAYMENT_OPTIONS.find((option) => option.value === form.paymentMethod)?.label}</strong>
+                </div>
+              </div>
+            </article>
+
+            <article className="surface-card">
+              <p className="eyebrow">Checkout tips</p>
+              <div className="info-list">
+                <div className="info-item">
+                  <span>Address accuracy</span>
+                  <strong>Use the phone number that should receive courier updates.</strong>
+                </div>
+                <div className="info-item">
+                  <span>Coupon note</span>
+                  <strong>{couponState ? `${couponState.code} is applied successfully` : 'Try a valid coupon code before placing the order'}</strong>
+                </div>
+                <div className="info-item">
+                  <span>Order safety</span>
+                  <strong>You will be able to track the shipment from your Orders page after purchase.</strong>
+                </div>
+              </div>
+            </article>
+          </div>
+
           <form className="surface-card stack-list checkout-form-card" onSubmit={handleSubmit}>
             <p className="checkout-form-card__title">Delivery &amp; payment</p>
             <div className="grid-two">
-            <Input
-              label="Full Name"
-              required
-              value={form.fullName}
-              onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
-            />
-            <Input
-              label="Phone"
-              required
-              value={form.phone}
-              onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
-            />
-          </div>
-          <Input
-            label="Address Line 1"
-            required
-            value={form.line1}
-            onChange={(event) => setForm((current) => ({ ...current, line1: event.target.value }))}
-          />
-          <Input
-            label="Address Line 2"
-            value={form.line2}
-            onChange={(event) => setForm((current) => ({ ...current, line2: event.target.value }))}
-          />
-          <div className="grid-two">
-            <Input
-              label="City"
-              required
-              value={form.city}
-              onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
-            />
-            <Input
-              label="State"
-              required
-              value={form.state}
-              onChange={(event) => setForm((current) => ({ ...current, state: event.target.value }))}
-            />
-          </div>
-          <div className="grid-two">
-            <Input
-              label="Postal Code"
-              required
-              value={form.postalCode}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, postalCode: event.target.value }))
-              }
-            />
-            <Input
-              label="Payment Method"
-              as="select"
-              options={PAYMENT_OPTIONS}
-              value={form.paymentMethod}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, paymentMethod: event.target.value }))
-              }
-            />
-          </div>
-
-          <div className="coupon-row">
-            <Input
-              label="Coupon"
-              placeholder="VELORA10"
-              value={couponCode}
-              onChange={(event) => setCouponCode(event.target.value)}
-            />
-            <Button type="button" variant="secondary" onClick={applyCoupon}>
-              Apply
-            </Button>
-          </div>
-
-          {couponState ? (
-            <div className="alert alert-success">
-              Coupon applied. Discount: {couponState.discountAmount}
+              <Input
+                label="Full Name"
+                required
+                value={form.fullName}
+                onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
+              />
+              <Input
+                label="Phone"
+                required
+                value={form.phone}
+                onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
+              />
             </div>
-          ) : null}
-          {error ? <div className="alert alert-error">{error}</div> : null}
+            <Input
+              label="Address Line 1"
+              required
+              value={form.line1}
+              onChange={(event) => setForm((current) => ({ ...current, line1: event.target.value }))}
+            />
+            <Input
+              label="Address Line 2"
+              value={form.line2}
+              onChange={(event) => setForm((current) => ({ ...current, line2: event.target.value }))}
+            />
+            <div className="grid-two">
+              <Input
+                label="City"
+                required
+                value={form.city}
+                onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
+              />
+              <Input
+                label="State"
+                required
+                value={form.state}
+                onChange={(event) => setForm((current) => ({ ...current, state: event.target.value }))}
+              />
+            </div>
+            <div className="grid-two">
+              <Input
+                label="Postal Code"
+                required
+                value={form.postalCode}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, postalCode: event.target.value }))
+                }
+              />
+              <Input
+                label="Payment Method"
+                as="select"
+                options={PAYMENT_OPTIONS}
+                value={form.paymentMethod}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, paymentMethod: event.target.value }))
+                }
+              />
+            </div>
+
+            <div className="coupon-row">
+              <Input
+                label="Coupon"
+                placeholder="VELORA10"
+                value={couponCode}
+                onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+              />
+              <Button type="button" variant="secondary" onClick={applyCoupon}>
+                Apply
+              </Button>
+            </div>
+
+            {couponState ? (
+              <div className="alert alert-success">
+                Coupon applied. You saved {formatCurrency(couponState.discountAmount)}.
+              </div>
+            ) : null}
+            {error ? <div className="alert alert-error">{error}</div> : null}
 
             <Button type="submit" fullWidth disabled={submitting}>
-              {submitting ? 'Placing order...' : 'Place Order'}
+              {submitting ? 'Placing order...' : `Place Order | ${formatCurrency(adjustedSummary.grandTotal)}`}
             </Button>
           </form>
         </div>

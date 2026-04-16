@@ -1,5 +1,17 @@
 import api from './api.js';
 
+const buildQueryString = (params = {}) => {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.set(key, value);
+    }
+  });
+
+  return searchParams.toString();
+};
+
 const orderService = {
   async createOrder(payload) {
     const response = await api.post('/orders', payload);
@@ -9,12 +21,14 @@ const orderService = {
     const response = await api.get('/orders/mine');
     return response.data.data;
   },
-  async getSellerOrders() {
-    const response = await api.get('/orders/seller');
+  async getSellerOrders(filters = {}) {
+    const query = buildQueryString(filters);
+    const response = await api.get(`/orders/seller${query ? `?${query}` : ''}`);
     return response.data.data;
   },
-  async getAllOrders() {
-    const response = await api.get('/orders/admin/all');
+  async getAllOrders(filters = {}) {
+    const query = buildQueryString(filters);
+    const response = await api.get(`/orders/admin/all${query ? `?${query}` : ''}`);
     return response.data.data;
   },
   async updateOrderStatus(orderId, payload) {
@@ -32,4 +46,3 @@ const orderService = {
 };
 
 export default orderService;
-

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Bar,
   BarChart,
@@ -11,10 +12,12 @@ import {
   YAxis,
 } from 'recharts';
 import DashboardLayout from '../../components/layout/DashboardLayout.jsx';
+import Button from '../../components/common/Button.jsx';
 import Loader from '../../components/common/Loader.jsx';
 import StatCard from '../../components/dashboard/StatCard.jsx';
 import OrderStatusBadge from '../../components/order/OrderStatusBadge.jsx';
 import dashboardService from '../../services/dashboardService.js';
+import { formatDate } from '../../utils/formatDate.js';
 import formatCurrency from '../../utils/formatCurrency.js';
 
 const Dashboard = () => {
@@ -34,6 +37,24 @@ const Dashboard = () => {
     loadDashboard();
   }, []);
 
+  const insights = useMemo(() => {
+    const totalUsers =
+      (dashboard?.userSplit?.customers || 0) +
+      (dashboard?.userSplit?.shopkeepers || 0) +
+      (dashboard?.userSplit?.admins || 0);
+
+    return {
+      totalUsers,
+      revenuePerSeller:
+        dashboard?.stats?.shopkeepers > 0
+          ? dashboard.stats.revenue / dashboard.stats.shopkeepers
+          : 0,
+      monthlyAverage:
+        (dashboard?.monthlyRevenue || []).reduce((sum, item) => sum + item.value, 0) /
+          Math.max((dashboard?.monthlyRevenue || []).length, 1) || 0,
+    };
+  }, [dashboard]);
+
   if (loading) {
     return <Loader label="Loading admin dashboard" />;
   }
@@ -48,8 +69,46 @@ const Dashboard = () => {
     <DashboardLayout
       role="ADMIN"
       title="Marketplace control center"
-      description="Monitor platform growth, seller quality, catalog health, and revenue flow."
+      description="Monitor platform growth, seller quality, catalog health, and revenue flow from one cleaner command view."
+      actions={
+        <>
+          <Link to="/admin/users">
+            <Button variant="ghost">Review Users</Button>
+          </Link>
+          <Link to="/admin/orders">
+            <Button>Review Orders</Button>
+          </Link>
+        </>
+      }
     >
+      <section className="surface-card console-hero console-hero--admin">
+        <div>
+          <p className="eyebrow">Platform watch</p>
+          <h3>High-trust operations start with faster visibility.</h3>
+          <p className="section-copy">
+            Surface seller approvals, revenue momentum, and current order signals before they turn into support load.
+          </p>
+        </div>
+        <div className="console-hero__stats">
+          <div className="console-stat">
+            <span>Total users</span>
+            <strong>{insights.totalUsers}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Pending sellers</span>
+            <strong>{dashboard?.stats?.pendingSellers || 0}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Avg monthly revenue</span>
+            <strong>{formatCurrency(insights.monthlyAverage)}</strong>
+          </div>
+          <div className="console-stat">
+            <span>Revenue / seller</span>
+            <strong>{formatCurrency(insights.revenuePerSeller)}</strong>
+          </div>
+        </div>
+      </section>
+
       <div className="stats-grid">
         <StatCard label="Customers" value={dashboard?.stats?.users || 0} />
         <StatCard label="Shopkeepers" value={dashboard?.stats?.shopkeepers || 0} />
@@ -94,16 +153,49 @@ const Dashboard = () => {
 
       <div className="dashboard-two-up">
         <article className="surface-card">
+          <p className="eyebrow">Admin focus list</p>
+          <div className="info-list">
+            <div className="info-item">
+              <span>Approvals waiting</span>
+              <strong>{dashboard?.stats?.pendingSellers || 0} seller application(s) need review</strong>
+            </div>
+            <div className="info-item">
+              <span>Current month</span>
+              <strong>
+                {formatCurrency(dashboard?.stats?.currentMonthSales || 0)} processed in {dashboard?.currentMonthLabel}
+              </strong>
+            </div>
+            <div className="info-item">
+              <span>Catalog volume</span>
+              <strong>{dashboard?.stats?.products || 0} listings currently tracked across the marketplace</strong>
+            </div>
+          </div>
+          <div className="inline-actions">
+            <Link to="/admin/products">
+              <Button variant="secondary">Moderate Products</Button>
+            </Link>
+            <Link to="/admin/coupons">
+              <Button variant="ghost">Manage Coupons</Button>
+            </Link>
+          </div>
+        </article>
+
+        <article className="surface-card">
           <p className="eyebrow">Seller Queue</p>
           <div className="stack-list compact-list">
             {dashboard?.sellerQueue?.length ? (
               dashboard.sellerQueue.map((seller) => (
                 <div key={seller._id} className="list-row">
                   <div>
-                    <strong>{seller.firstName} {seller.lastName}</strong>
+                    <strong>
+                      {seller.firstName} {seller.lastName}
+                    </strong>
                     <p className="muted-text">{seller.sellerProfile?.shopName}</p>
                   </div>
-                  <span>{seller.sellerProfile?.status}</span>
+                  <div className="order-list-meta">
+                    <span className="status-tag status-tag--warning">{seller.sellerProfile?.status}</span>
+                    <span className="muted-text">Joined {formatDate(seller.createdAt)}</span>
+                  </div>
                 </div>
               ))
             ) : (
@@ -111,33 +203,34 @@ const Dashboard = () => {
             )}
           </div>
         </article>
+      </div>
 
-        <article className="surface-card">
-          <p className="eyebrow">Recent Orders</p>
-          <div className="stack-list compact-list">
-            {dashboard?.recentOrders?.length ? (
-              dashboard.recentOrders.map((order) => (
-                <div key={order._id} className="list-row">
-                  <div>
-                    <strong>{order.orderNumber}</strong>
+      <article className="surface-card">
+        <p className="eyebrow">Recent Orders</p>
+        <div className="stack-list compact-list">
+          {dashboard?.recentOrders?.length ? (
+            dashboard.recentOrders.map((order) => (
+              <div key={order._id} className="list-row">
+                <div>
+                  <strong>{order.orderNumber}</strong>
                     <p className="muted-text">
                       {order.customer
                         ? `${order.customer.firstName} ${order.customer.lastName}`
-                        : 'Deleted user'}
+                        : 'Deleted user'}{' '}
+                      | {formatDate(order.createdAt)}
                     </p>
-                  </div>
-                  <div className="order-list-meta">
-                    <OrderStatusBadge status={order.fulfillment?.status} showDetail={false} />
-                    <span>{formatCurrency(order.pricing?.grandTotal)}</span>
-                  </div>
                 </div>
-              ))
-            ) : (
-              <div className="empty-state">Recent orders will appear here.</div>
-            )}
-          </div>
-        </article>
-      </div>
+                <div className="order-list-meta">
+                  <OrderStatusBadge status={order.fulfillment?.status} showDetail={false} />
+                  <span>{formatCurrency(order.pricing?.grandTotal)}</span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state">Recent orders will appear here.</div>
+          )}
+        </div>
+      </article>
     </DashboardLayout>
   );
 };

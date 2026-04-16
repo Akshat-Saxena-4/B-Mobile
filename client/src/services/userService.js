@@ -1,5 +1,21 @@
 import api from './api.js';
 
+const buildQueryString = (params = {}) => {
+  if (typeof params === 'string') {
+    return params;
+  }
+
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.set(key, value);
+    }
+  });
+
+  return searchParams.toString();
+};
+
 const userService = {
   async getWishlist() {
     const response = await api.get('/users/wishlist');
@@ -25,8 +41,9 @@ const userService = {
     const response = await api.delete('/users/cart');
     return response.data.data;
   },
-  async getUsers(params = '') {
-    const response = await api.get(`/users${params ? `?${params}` : ''}`);
+  async getUsers(params = {}) {
+    const query = buildQueryString(params);
+    const response = await api.get(`/users${query ? `?${query}` : ''}`);
     return response.data.data;
   },
   async toggleUserStatus(userId, isActive) {

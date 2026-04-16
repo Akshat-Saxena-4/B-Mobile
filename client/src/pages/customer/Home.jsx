@@ -115,7 +115,12 @@ const Home = () => {
 
       <section className="spotlight-grid home-spotlight">
         {HOME_SPOTLIGHT_LINKS.map((item) => (
-          <Link key={item.name} to={item.to} className="spotlight-card spotlight-card--link">
+          <Link
+            key={item.name}
+            to={item.to}
+            className={`spotlight-card spotlight-card--link${item.coverImage ? ' spotlight-card--cover' : ''}`}
+            style={item.coverImage ? { '--spotlight-cover': `url(${item.coverImage})` } : undefined}
+          >
             <p className="eyebrow">{item.name}</p>
             <h3>{item.description}</h3>
             <span className="spotlight-card__hint">Shop segment →</span>
@@ -147,7 +152,7 @@ const Home = () => {
         />
       </section>
 
-      <section className="promo-strip home-promo">
+      <section className="promo-strip home-promo home-promo--banner">
         <div>
           <p className="eyebrow">Why B-Mobile</p>
           <h3>Transparent pricing, trusted sellers, and a stack ready to scale.</h3>
