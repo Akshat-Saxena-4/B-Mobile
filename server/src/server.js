@@ -1,6 +1,7 @@
 import app from './app.js';
 import connectDB from './config/db.js';
 import env from './config/env.js';
+import { ensureAdminAccount } from './services/adminSeedService.js';
 import { seedDemoCatalog } from './services/catalogSeedService.js';
 import logger from './utils/logger.js';
 
@@ -17,6 +18,7 @@ const initializeDatabase = async () => {
   while (true) {
     try {
       await connectDB();
+      await ensureAdminAccount({ logger });
 
       if (env.seedDemoCatalogOnStart && !demoCatalogSeeded) {
         await seedDemoCatalog({

@@ -111,6 +111,8 @@ MONGODB_URI=your-mongodb-atlas-uri
 JWT_SECRET=generate-a-strong-random-secret
 JWT_EXPIRES_IN=7d
 ADMIN_REGISTER_SECRET=replace-with-an-admin-invite-code
+ADMIN_LOGIN_EMAIL=admin@example.com
+ADMIN_LOGIN_PASSWORD=change-this-admin-password
 CLIENT_URLS=https://b-mobile.netlify.app,http://localhost:5173
 SEED_DEMO_CATALOG_ON_START=false
 ```
@@ -125,6 +127,7 @@ VITE_API_URL=https://b-mobile-qj9o.onrender.com/api/v1
 
 - Public registration supports `Customer` and `Shopkeeper`
 - `Admin` registration is protected by `ADMIN_REGISTER_SECRET`
+- If `ADMIN_LOGIN_EMAIL` and `ADMIN_LOGIN_PASSWORD` are set, the backend will create or sync that admin account on startup
 - Product archival is implemented as a soft delete
 - Coupon validation is exposed separately for checkout previews
 - Render should provide `PORT` automatically in production

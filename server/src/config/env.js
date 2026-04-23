@@ -36,6 +36,8 @@ const env = {
   jwtSecret: process.env.JWT_SECRET || 'replace-with-a-strong-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   adminRegisterSecret: process.env.ADMIN_REGISTER_SECRET || 'admin-secret',
+  adminLoginEmail: String(process.env.ADMIN_LOGIN_EMAIL || '').trim().toLowerCase(),
+  adminLoginPassword: String(process.env.ADMIN_LOGIN_PASSWORD || '').trim(),
   clientUrl: clientUrls[0] || 'http://localhost:5173',
   clientUrls,
   seedDemoCatalogOnStart: parseBoolean(process.env.SEED_DEMO_CATALOG_ON_START),
